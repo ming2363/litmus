@@ -1,0 +1,10 @@
+{
+  "id": "feat-java-04",
+  "dimension": "feature",
+  "lang": "java",
+  "difficulty": "hard",
+  "title": "事件溯源聚合状态重建与快照机制",
+  "ref_minutes": 25,
+  "grader": "tests",
+  "allowed_paths": ["src/**/*.java"]
+}

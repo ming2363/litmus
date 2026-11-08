@@ -1,0 +1,10 @@
+{
+  "id": "bug-java-02",
+  "dimension": "bug",
+  "lang": "java",
+  "difficulty": "medium",
+  "title": "修复并发计数的丢失更新",
+  "ref_minutes": 25,
+  "grader": "tests",
+  "allowed_paths": ["hitcount/**/*.java"]
+}

@@ -1,0 +1,40 @@
+{
+  "release": "2026.11.08-rc2",
+  "items": [
+    {
+      "id": "CHK-01",
+      "action": "cache_warmup",
+      "region": "eu-central-1",
+      "namespace": "product-catalog",
+      "status": "pending"
+    },
+    {
+      "id": "CHK-02",
+      "action": "dns_verify",
+      "hostname": "api.checkout.internal",
+      "record_type": "CNAME",
+      "status": "pending"
+    },
+    {
+      "id": "CHK-03",
+      "action": "flag_sync",
+      "service": "billing-ledger",
+      "environment": "prod",
+      "status": "completed"
+    },
+    {
+      "id": "CHK-04",
+      "action": "flag_sync",
+      "service": "search-rerank",
+      "environment": "prod",
+      "status": "pending"
+    },
+    {
+      "id": "CHK-05",
+      "action": "cache_warmup",
+      "region": "us-west-2",
+      "namespace": "legacy-assets",
+      "status": "cancelled"
+    }
+  ]
+}

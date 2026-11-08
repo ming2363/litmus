@@ -1,0 +1,9 @@
+{
+  "id": "term-05",
+  "dimension": "terminal",
+  "lang": "none",
+  "difficulty": "medium",
+  "title": "在 git bundle 中定位回归提交",
+  "ref_minutes": 12,
+  "grader": "terminal"
+}

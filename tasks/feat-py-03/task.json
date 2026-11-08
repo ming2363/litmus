@@ -1,0 +1,10 @@
+{
+  "id": "feat-py-03",
+  "dimension": "feature",
+  "lang": "python",
+  "difficulty": "medium",
+  "title": "仓储路径规划第二阶段：带权能耗、转向代价与批量寻路",
+  "ref_minutes": 18,
+  "grader": "tests",
+  "allowed_paths": ["src/*.py"]
+}

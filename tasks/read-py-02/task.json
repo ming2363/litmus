@@ -1,0 +1,10 @@
+{
+  "id": "read-py-02",
+  "dimension": "read_code",
+  "lang": "python",
+  "difficulty": "medium",
+  "title": "夜班封账事件的分发链",
+  "ref_minutes": 40,
+  "grader": "read_code",
+  "answer_file": "answer.json"
+}

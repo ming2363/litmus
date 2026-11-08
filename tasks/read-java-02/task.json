@@ -1,0 +1,10 @@
+{
+  "id": "read-java-02",
+  "dimension": "read_code",
+  "lang": "java",
+  "difficulty": "medium",
+  "title": "备用环境下的计费网关实现",
+  "ref_minutes": 40,
+  "grader": "read_code",
+  "answer_file": "answer.json"
+}

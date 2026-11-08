@@ -1,0 +1,11 @@
+{
+  "id": "edit-java-03",
+  "dimension": "edit",
+  "lang": "java",
+  "difficulty": "medium",
+  "title": "将 TicketDao 中的 SQL 字符串拼接重构为 PreparedStatement 参数化查询",
+  "ref_minutes": 15,
+  "grader": "tests",
+  "allowed_paths": ["src/com/litmus/ticket/TicketDao.java"],
+  "max_changed_lines": 60
+}

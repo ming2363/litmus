@@ -1,0 +1,10 @@
+{
+  "id": "feat-java-02",
+  "dimension": "feature",
+  "lang": "java",
+  "difficulty": "medium",
+  "title": "重构支付渠道 switch 为策略接口并新增渠道",
+  "ref_minutes": 18,
+  "grader": "tests",
+  "allowed_paths": ["src/**/*.java"]
+}

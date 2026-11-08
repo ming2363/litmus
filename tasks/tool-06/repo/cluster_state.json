@@ -1,0 +1,28 @@
+{
+  "artifacts": {
+    "checkout-core": {
+      "v2.8.3": {
+        "image_built": true,
+        "smoke_tests_passed": true,
+        "artifact_signed": true
+      },
+      "v2.8.4": {
+        "image_built": true,
+        "smoke_tests_passed": true,
+        "artifact_signed": false
+      }
+    }
+  },
+  "clusters": {
+    "prod-east": {
+      "config_synced": true,
+      "deploy_lock_held": false,
+      "lock_owner": null
+    },
+    "prod-west": {
+      "config_synced": true,
+      "deploy_lock_held": true,
+      "lock_owner": "ops-lead"
+    }
+  }
+}

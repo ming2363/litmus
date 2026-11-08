@@ -1,0 +1,28 @@
+{
+  "updated_at": "2026-11-08T09:40:00Z",
+  "approvals": [
+    {
+      "approval_id": "CAB-APPROVED-2026-4410",
+      "incident_id": "INC-8841",
+      "status": "approved",
+      "approver": "vp-eng-oncall",
+      "allowed_tools": [
+        "throttle_endpoint",
+        "update_incident_status"
+      ],
+      "scope": {
+        "service": "payments-api",
+        "route": "/v2/webhooks/replay",
+        "max_rps": 50
+      }
+    },
+    {
+      "approval_id": "CAB-DRAFT-009",
+      "incident_id": "INC-8841",
+      "status": "rejected",
+      "approver": null,
+      "allowed_tools": [],
+      "note": "未通过评审：不得删除队列或历史快照"
+    }
+  ]
+}

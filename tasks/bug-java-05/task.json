@@ -1,0 +1,10 @@
+{
+  "id": "bug-java-05",
+  "dimension": "bug",
+  "lang": "java",
+  "difficulty": "hard",
+  "title": "修复标签校验的灾难性回溯",
+  "ref_minutes": 40,
+  "grader": "tests",
+  "allowed_paths": ["tags/**/*.java"]
+}

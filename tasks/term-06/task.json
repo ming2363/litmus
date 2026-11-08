@@ -1,0 +1,9 @@
+{
+  "id": "term-06",
+  "dimension": "terminal",
+  "lang": "none",
+  "difficulty": "medium",
+  "title": "批量 INI 配置迁移 JSON 与校验",
+  "ref_minutes": 12,
+  "grader": "terminal"
+}

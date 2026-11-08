@@ -1,0 +1,22 @@
+{
+  "services": [
+    {
+      "service": "checkout-gateway",
+      "alias": "结账网关",
+      "primary_region": "ap-southeast-1",
+      "canary_region": "ap-southeast-1",
+      "active_canary_revision": "rev-20261108-03",
+      "stable_revision": "rev-20261106-11",
+      "cost_center": "cc-checkout-core"
+    },
+    {
+      "service": "search-aggregator",
+      "alias": "搜索聚合",
+      "primary_region": "eu-central-1",
+      "canary_region": "eu-central-1",
+      "active_canary_revision": null,
+      "stable_revision": "rev-20261105-02",
+      "cost_center": "cc-search-platform"
+    }
+  ]
+}

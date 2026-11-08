@@ -1,0 +1,10 @@
+{
+  "id": "read-java-04",
+  "dimension": "read_code",
+  "lang": "java",
+  "difficulty": "hard",
+  "title": "闸口状态机中的不可达状态",
+  "ref_minutes": 55,
+  "grader": "read_code",
+  "answer_file": "answer.json"
+}

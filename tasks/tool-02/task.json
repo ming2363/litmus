@@ -1,0 +1,10 @@
+{
+  "id": "tool-02",
+  "dimension": "tool_call",
+  "lang": "none",
+  "difficulty": "easy",
+  "title": "无合适工具时返回空调用列表",
+  "ref_minutes": 5,
+  "grader": "tool_call",
+  "answer_file": "answer.json"
+}

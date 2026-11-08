@@ -1,0 +1,5 @@
+2026-11-08T14:14:55+08:00 FATAL ledger shard-3 checksum mismatch
+2026-11-08T14:15:30+08:00 ERROR batch export failed for tenant=acme
+  Traceback: ERROR inside continuation must be ignored
+2026-11-08T14:16:40+08:00 ERROR archival upload checksum mismatch
+2026-11-08T14:18:10+08:00 DEBUG retry succeeded previous=ERROR

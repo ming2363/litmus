@@ -1,0 +1,10 @@
+{
+  "id": "feat-java-01",
+  "dimension": "feature",
+  "lang": "java",
+  "difficulty": "easy",
+  "title": "订单校验器新增冷链配送规则",
+  "ref_minutes": 8,
+  "grader": "tests",
+  "allowed_paths": ["src/**/*.java"]
+}

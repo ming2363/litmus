@@ -1,0 +1,5 @@
+tx_id,region_code,currency,amount,valid
+T101,ap,USD,100.00,true
+T102,ap,JPY,15000,true
+T103,eu,EUR,50.00,false
+T104,eu,EUR,80.00,true

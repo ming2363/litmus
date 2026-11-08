@@ -1,0 +1,10 @@
+{
+  "id": "tool-01",
+  "dimension": "tool_call",
+  "lang": "none",
+  "difficulty": "easy",
+  "title": "提取参数并完成单次工具调用",
+  "ref_minutes": 5,
+  "grader": "tool_call",
+  "answer_file": "answer.json"
+}

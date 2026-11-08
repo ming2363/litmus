@@ -1,0 +1,25 @@
+order_id,region,category,amount,status
+ORD-1001,north,"Electronics, Audio",120.00,completed
+ORD-1002,north,"Home, Kitchen",80.50,completed
+ORD-1003,north,Books,45.00,cancelled
+ORD-1004,north,"Office, Supplies",99.50,completed
+ORD-1005,north,"Electronics, Audio",200.00,completed
+ORD-1006,north,"Home, Kitchen",60.00,refunded
+ORD-1007,east,"Home, Kitchen",150.25,completed
+ORD-1008,east,Books,49.75,completed
+ORD-1009,east,"Office, Supplies",100.00,completed
+ORD-1010,east,"Electronics, Audio",310.00,pending
+ORD-1011,east,"Sports, Outdoor",180.00,completed
+ORD-1012,east,Books,20.00,completed
+ORD-1013,south,"Office, Supplies",75.00,completed
+ORD-1014,south,"Electronics, Audio",225.00,completed
+ORD-1015,south,"Home, Kitchen",90.00,cancelled
+ORD-1016,south,"Sports, Outdoor",150.00,completed
+ORD-1017,west,Books,36.00,completed
+ORD-1018,west,"Home, Kitchen",84.00,completed
+ORD-1019,west,"Office, Supplies",60.00,completed
+ORD-1020,west,"Electronics, Audio",140.00,refunded
+ORD-1021,west,"Sports, Outdoor",120.00,completed
+ORD-1022,north,Books,100.00,completed
+ORD-1023,east,"Home, Kitchen",100.00,cancelled
+ORD-1024,south,Books,30.00,completed

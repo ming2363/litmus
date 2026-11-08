@@ -1,0 +1,41 @@
+--- a/harbornotify/clock.py
++++ b/harbornotify/clock.py
+@@ -7,4 +7,6 @@
+         raise ValueError("minute")
+     if minute < 480:
+         return "night"
+-    return "day"
++    if minute < 960:
++        return "day"
++    return "evening"
+--- a/harbornotify/notifier.py
++++ b/harbornotify/notifier.py
+@@ -4,7 +4,7 @@
+ 
+ 
+ class IdleNotifier(object):
+-    """只处理占用。"""
++    """空闲与占用分开措辞。"""
+ 
+     def __init__(self, lookup=None):
+         self.lookup = lookup or BerthLookup()
+@@ -14,8 +14,15 @@
+         return "占用：" + berth["display_name"].strip()
+ 
+     def on_sensor(self, event):
+-        """目前只发送占用通知。"""
++        """kind 为 occupied 或 idle。底账没有该泊位时 lookup 返回 None。"""
+         berth = self.lookup.find(event["berth_id"])
+-        if berth is None:
+-            return "未知泊位"
+-        return self.render_occupied(berth)
++        if event["kind"] == "occupied":
++            if berth is None:
++                return "未知泊位"
++            return self.render_occupied(berth)
++        minute = event.get("minute", 0)
++        if isinstance(minute, bool) or not isinstance(minute, int):
++            minute = 0
++        label = berth["display_name"].strip()
++        zone = berth["zone"]
++        return "空闲：" + label + "@" + str(minute) + "（" + zone + "）"

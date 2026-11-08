@@ -1,0 +1,10 @@
+{
+  "id": "bug-java-01",
+  "dimension": "bug",
+  "lang": "java",
+  "difficulty": "easy",
+  "title": "修复阶梯档位的下界查找",
+  "ref_minutes": 15,
+  "grader": "tests",
+  "allowed_paths": ["metering/**/*.java"]
+}

@@ -1,0 +1,10 @@
+{
+  "id": "review-java-01",
+  "dimension": "review",
+  "lang": "java",
+  "difficulty": "easy",
+  "title": "模板读取未关闭文件流",
+  "ref_minutes": 15,
+  "grader": "review",
+  "answer_file": "review.json"
+}

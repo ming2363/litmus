@@ -1,0 +1,59 @@
+--- a/gatestats/BusinessDay.java
++++ b/gatestats/BusinessDay.java
+@@ -1,11 +1,16 @@
+ package gatestats;
+ 
+ import java.time.Instant;
++import java.time.LocalDate;
+ import java.time.ZoneId;
+ 
+-/** 只做上海时区的展示。 */
++/** 业务日按 Asia/Shanghai 切分，不跟随运行机器的默认时区。 */
+ public final class BusinessDay {
+     private BusinessDay() {
++    }
++
++    public static LocalDate businessDate(long epochMillis) {
++        return Instant.ofEpochMilli(epochMillis).atZone(ZoneId.systemDefault()).toLocalDate();
+     }
+ 
+     public static String formatShanghai(long epochMillis) {
+--- a/gatestats/PassPage.java
++++ b/gatestats/PassPage.java
+@@ -1,7 +1,22 @@
+ package gatestats;
+ 
+-/** 过车记录分页尚未实现。 */
++import java.util.List;
++
++/** 过车记录分页。 */
+ public final class PassPage {
+     private PassPage() {
+     }
++
++    /**
++     * page 从 1 开始。
++     * 最后一页不足 size 时返回剩余元素，不抛出 IndexOutOfBoundsException。
++     */
++    public static List<PassRow> page(List<PassRow> all, int page, int size) {
++        if (page < 1 || size < 1) {
++            throw new IllegalArgumentException("page");
++        }
++        int from = (page - 1) * size;
++        int to = from + size;
++        return all.subList(from, to);
++    }
+ }
+--- a/gatestats/WindowMath.java
++++ b/gatestats/WindowMath.java
+@@ -1,8 +1,8 @@
+ package gatestats;
+ 
+-/** 统计窗口。以前最长 1 天。 */
++/** 统计窗口。最长 90 天。 */
+ public final class WindowMath {
+-    public static final int MAX_WINDOW_MINUTES = 24 * 60;
++    public static final int MAX_WINDOW_MINUTES = 90 * 24 * 60;
+ 
+     private WindowMath() {
+     }

@@ -1,0 +1,10 @@
+{
+  "id": "read-java-03",
+  "dimension": "read_code",
+  "lang": "java",
+  "difficulty": "medium",
+  "title": "预占过期异常的捕获路径",
+  "ref_minutes": 40,
+  "grader": "read_code",
+  "answer_file": "answer.json"
+}

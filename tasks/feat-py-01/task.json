@@ -1,0 +1,10 @@
+{
+  "id": "feat-py-01",
+  "dimension": "feature",
+  "lang": "python",
+  "difficulty": "easy",
+  "title": "记账命令行工具新增 --since 日期过滤",
+  "ref_minutes": 8,
+  "grader": "tests",
+  "allowed_paths": ["src/*.py"]
+}

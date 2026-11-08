@@ -1,0 +1,9 @@
+# rotated edge-proxy log
+[2026-11-08 14:14:10 +0800] INFO req_id=101 path=/api/error-codes status=200
+[2026-11-08 14:14:22 +0800] ERROR req_id=102 upstream timeout 504
+[2026-11-08 14:15:05 +0800] ERROR req_id=103 bad gateway from pool-a
+[2026-11-08 14:15:48 +0800] FATAL req_id=104 TLS handshake worker crash
+  Caused by: OpenSSL ERROR: certificate store locked
+  at ProxyWorker.run(worker.py:88)
+[2026-11-08 14:16:02 +0800] WARN req_id=105 slow response status=ERROR_RETRY
+[2026-11-08 14:16:33 +0800] ERROR req_id=106 connection reset by peer

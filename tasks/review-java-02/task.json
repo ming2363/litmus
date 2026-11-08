@@ -1,0 +1,10 @@
+{
+  "id": "review-java-02",
+  "dimension": "review",
+  "lang": "java",
+  "difficulty": "medium",
+  "title": "泊位认领的检查后执行竞态",
+  "ref_minutes": 25,
+  "grader": "review",
+  "answer_file": "review.json"
+}

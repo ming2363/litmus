@@ -1,0 +1,10 @@
+{
+  "id": "feat-py-02",
+  "dimension": "feature",
+  "lang": "python",
+  "difficulty": "medium",
+  "title": "SQLite 新增按月汇总与环比报表",
+  "ref_minutes": 15,
+  "grader": "tests",
+  "allowed_paths": ["src/*.py"]
+}

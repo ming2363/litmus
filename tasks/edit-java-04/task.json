@@ -1,0 +1,11 @@
+{
+  "id": "edit-java-04",
+  "dimension": "edit",
+  "lang": "java",
+  "difficulty": "hard",
+  "title": "缩小 TokenBroker 的 synchronized 临界区并消除阻塞与并发写回竞态",
+  "ref_minutes": 25,
+  "grader": "tests",
+  "allowed_paths": ["src/com/litmus/signing/TokenBroker.java"],
+  "max_changed_lines": 75
+}

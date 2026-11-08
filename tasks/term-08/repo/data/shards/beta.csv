@@ -1,0 +1,4 @@
+tx_id,region_code,currency,amount,valid
+T201,na,USD,250.00,true
+T202,ap,USD,50.00,true
+T203,na,CAD,100.00,true

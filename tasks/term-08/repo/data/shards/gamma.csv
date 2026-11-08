@@ -1,0 +1,4 @@
+tx_id,region_code,currency,amount,valid
+T301,eu,GBP,100.00,true
+T302,na,USD,40.00,false
+T303,ap,EUR,100.00,true

@@ -1,0 +1,11 @@
+{
+  "id": "edit-py-03",
+  "dimension": "edit",
+  "lang": "python",
+  "difficulty": "medium",
+  "title": "扩展物流单号正则并修复文本提取边界",
+  "ref_minutes": 10,
+  "grader": "tests",
+  "allowed_paths": ["src/identifiers.py"],
+  "max_changed_lines": 25
+}

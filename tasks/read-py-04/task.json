@@ -1,0 +1,10 @@
+{
+  "id": "read-py-04",
+  "dimension": "read_code",
+  "lang": "python",
+  "difficulty": "hard",
+  "title": "潮汐对账插件的实际调用链",
+  "ref_minutes": 55,
+  "grader": "read_code",
+  "answer_file": "answer.json"
+}

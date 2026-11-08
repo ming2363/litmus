@@ -1,0 +1,10 @@
+{
+  "id": "bug-py-03",
+  "dimension": "bug",
+  "lang": "python",
+  "difficulty": "medium",
+  "title": "修复访问日志字段被贪婪匹配吞掉",
+  "ref_minutes": 25,
+  "grader": "tests",
+  "allowed_paths": ["accesslog/**/*.py"]
+}

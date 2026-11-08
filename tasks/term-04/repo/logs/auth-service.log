@@ -1,0 +1,8 @@
+2026-11-08T06:14:09Z ERROR token signature verification failed user=u11
+2026-11-08T06:14:51Z WARN login delay > 800ms error_budget=ok
+2026-11-08T06:15:11Z ERROR redis session store unreachable
+Traceback (most recent call last):
+  File "auth/session.py", line 42, in fetch
+  ERROR: connection refused on 10.0.4.12:6379
+2026-11-08T06:15:59Z INFO health check passed status=NO_ERROR
+2026-11-08T06:16:15Z ERROR jwks cache refresh failed

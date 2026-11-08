@@ -1,0 +1,2 @@
+module=auth
+token_ttl=3600

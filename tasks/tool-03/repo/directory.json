@@ -1,0 +1,23 @@
+[
+  {
+    "email": "lin.weiran@novatek.local",
+    "name": "林未然",
+    "department": "finance",
+    "user_id": "usr-3108",
+    "status": "suspended"
+  },
+  {
+    "email": "lin.weirong@novatek.local",
+    "name": "林未荣",
+    "department": "platform",
+    "user_id": "usr-4092",
+    "status": "active"
+  },
+  {
+    "email": "chen.ming@novatek.local",
+    "name": "陈鸣",
+    "department": "platform",
+    "user_id": "usr-2715",
+    "status": "active"
+  }
+]

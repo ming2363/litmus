@@ -1,0 +1,83 @@
+--- a/demurrage/alert.py
++++ b/demurrage/alert.py
+@@ -1,8 +1,8 @@
+ """超过 500 元就告警。"""
+ 
+-from demurrage.calc import charge_yuan
++from demurrage.calc import charge_cents
+ 
+ 
+ def should_alert(start, end):
+     """阈值是 500 元。"""
+-    return charge_yuan(start, end) > 500
++    return charge_cents(start, end) > 500
+--- a/demurrage/calc.py
++++ b/demurrage/calc.py
+@@ -1,22 +1,27 @@
+-"""滞期费，单位是元。"""
++"""滞期费，单位是分。"""
+ 
+ 
+ def round_up_minutes(seconds):
+-    """把秒换算成分钟。有余数才进一，整分钟和 0 秒都不加。"""
++    """把秒换算成分钟。
++
++    0 秒得到 0。秒数正好是 60 的倍数时保持整分钟，不额外加 1。
++    只要有余数就向上进 1 分钟。负数抛出 ValueError。
++    """
+     if isinstance(seconds, bool) or not isinstance(seconds, int):
+         raise TypeError("seconds")
+     if seconds < 0:
+         raise ValueError("seconds")
+-    if seconds == 0:
+-        return 0
+-    return (seconds + 59) // 60
++    return seconds // 60 + 1
+ 
+ 
+-def charge_yuan(start, end):
+-    """返回元。"""
++def charge_cents(start, end):
++    """按秒计算滞期费，返回分。
++
++    先换成向上取整的分钟，再乘每分钟 150 分。结果超过 200000 分时封顶。
++    """
+     seconds = end - start
+     minutes = round_up_minutes(seconds)
+-    yuan = minutes * 1.5
+-    if yuan > 2000:
+-        return 2000
+-    return yuan
++    cents = minutes * 150
++    if cents > 200000:
++        return 200000
++    return cents
+--- a/demurrage/export.py
++++ b/demurrage/export.py
+@@ -1,9 +1,9 @@
+ """导出给财务的行。amount_yuan 的单位是元。"""
+ 
+-from demurrage.calc import charge_yuan
++from demurrage.calc import charge_cents
+ 
+ 
+ def export_row(start, end, hold_id):
+-    """金额字段是元。"""
+-    amount_yuan = charge_yuan(start, end)
++    """增加了 hold_id。金额字段仍然是元。"""
++    amount_yuan = charge_cents(start, end)
+     return {"hold_id": hold_id, "amount_yuan": amount_yuan}
+--- a/demurrage/invoice.py
++++ b/demurrage/invoice.py
+@@ -1,8 +1,8 @@
+ """发票金额用元。"""
+ 
+-from demurrage.calc import charge_yuan
++from demurrage.calc import charge_cents
+ 
+ 
+ def invoice_yuan(start, end):
+-    """本来就是元。"""
+-    return charge_yuan(start, end)
++    """分转成元。"""
++    return charge_cents(start, end) / 100.0

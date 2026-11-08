@@ -1,0 +1,10 @@
+{
+  "id": "tool-06",
+  "dimension": "tool_call",
+  "lang": "none",
+  "difficulty": "medium",
+  "title": "核查并补齐隐含前置条件的顺序调用",
+  "ref_minutes": 8,
+  "grader": "tool_call",
+  "answer_file": "answer.json"
+}

@@ -1,0 +1,3 @@
+Action items:
+1. Automate schema validation.
+2. Document rollback steps.

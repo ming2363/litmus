@@ -1,0 +1,7 @@
+2026-11-08T01:14:01-05:00 ERROR invoice id=801 tax engine error
+2026-11-08T01:14:40-05:00 INFO job=reconcile skipped=0 error_count=0
+
+2026-11-08T01:15:19-05:00 ERROR payment gateway 502 on tx=9912
+2026-11-08T01:15:42-05:00 ERROR idempotency lock contention on tx=9915
+  FATAL: nested detail line must not double-count
+2026-11-08T01:17:05-05:00 ERROR dead-letter queue overflow

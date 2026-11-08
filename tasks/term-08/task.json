@@ -1,0 +1,9 @@
+{
+  "id": "term-08",
+  "dimension": "terminal",
+  "lang": "none",
+  "difficulty": "hard",
+  "title": "修复 Makefile 多步数据管道增量依赖",
+  "ref_minutes": 18,
+  "grader": "terminal"
+}

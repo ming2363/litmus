@@ -1,0 +1,10 @@
+{
+  "id": "bug-py-01",
+  "dimension": "bug",
+  "lang": "python",
+  "difficulty": "easy",
+  "title": "修复预发布版本号的先后比较",
+  "ref_minutes": 15,
+  "grader": "tests",
+  "allowed_paths": ["harbor/**/*.py"]
+}

@@ -1,0 +1,9 @@
+{
+  "id": "term-02",
+  "dimension": "terminal",
+  "lang": "none",
+  "difficulty": "easy",
+  "title": "CSV 订单分组统计汇总",
+  "ref_minutes": 6,
+  "grader": "terminal"
+}

@@ -1,0 +1,11 @@
+{
+  "id": "edit-py-04",
+  "dimension": "edit",
+  "lang": "python",
+  "difficulty": "hard",
+  "title": "精准修复复杂结算与退货引擎中的单处分支条件（限 6 行内）",
+  "ref_minutes": 25,
+  "grader": "tests",
+  "allowed_paths": ["src/**/*.py"],
+  "max_changed_lines": 6
+}

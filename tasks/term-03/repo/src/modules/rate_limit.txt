@@ -1,0 +1,2 @@
+module=rate_limit
+burst=120

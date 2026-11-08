@@ -1,0 +1,10 @@
+{
+  "id": "bug-java-06",
+  "dimension": "bug",
+  "lang": "java",
+  "difficulty": "easy",
+  "title": "修复渠道手续费的分位舍入",
+  "ref_minutes": 15,
+  "grader": "tests",
+  "allowed_paths": ["settlement/**/*.java"]
+}

@@ -1,0 +1,9 @@
+{
+  "id": "term-07",
+  "dimension": "terminal",
+  "lang": "none",
+  "difficulty": "hard",
+  "title": "按清单还原指定版本的发布文件树",
+  "ref_minutes": 25,
+  "grader": "terminal"
+}

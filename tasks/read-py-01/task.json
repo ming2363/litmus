@@ -1,0 +1,10 @@
+{
+  "id": "read-py-01",
+  "dimension": "read_code",
+  "lang": "python",
+  "difficulty": "easy",
+  "title": "泊位看板路由的最终处理函数",
+  "ref_minutes": 25,
+  "grader": "read_code",
+  "answer_file": "answer.json"
+}

@@ -1,0 +1,23 @@
+--- a/berthroster/BerthRoster.java
++++ b/berthroster/BerthRoster.java
+@@ -10,8 +10,19 @@
+ public final class BerthRoster {
+     private final Map<String, Worker> roster = new HashMap<String, Worker>();
+ 
+-    /** 认领与释放都在锁内。 */
++    /** 已持锁的认领，检查和写入在同一把锁里。 */
+     public synchronized Worker claimLocked(String berthId) {
++        Worker current = roster.get(berthId);
++        if (current == null || current.isReleased()) {
++            Worker created = Worker.hire(berthId);
++            roster.put(berthId, created);
++            return created;
++        }
++        return current;
++    }
++
++    /** 新的快速认领。 */
++    public Worker claim(String berthId) {
+         Worker current = roster.get(berthId);
+         if (current == null || current.isReleased()) {
+             Worker created = Worker.hire(berthId);

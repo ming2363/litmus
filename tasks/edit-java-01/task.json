@@ -1,0 +1,11 @@
+{
+  "id": "edit-java-01",
+  "dimension": "edit",
+  "lang": "java",
+  "difficulty": "easy",
+  "title": "调整审计日志输出为标准单行管道格式",
+  "ref_minutes": 6,
+  "grader": "tests",
+  "allowed_paths": ["src/com/litmus/log/AuditLogger.java"],
+  "max_changed_lines": 18
+}

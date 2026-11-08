@@ -1,0 +1,2 @@
+module=legacy_debug
+dump_secrets=true

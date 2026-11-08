@@ -1,0 +1,10 @@
+{
+  "id": "tool-03",
+  "dimension": "tool_call",
+  "lang": "none",
+  "difficulty": "medium",
+  "title": "先查用户 ID 再下单的顺序调用",
+  "ref_minutes": 8,
+  "grader": "tool_call",
+  "answer_file": "answer.json"
+}

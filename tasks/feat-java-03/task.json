@@ -1,0 +1,10 @@
+{
+  "id": "feat-java-03",
+  "dimension": "feature",
+  "lang": "java",
+  "difficulty": "medium",
+  "title": "旋转正多边形内小球碰撞反弹物理步进",
+  "ref_minutes": 18,
+  "grader": "tests",
+  "allowed_paths": ["src/**/*.java"]
+}

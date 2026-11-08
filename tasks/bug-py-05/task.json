@@ -1,0 +1,10 @@
+{
+  "id": "bug-py-05",
+  "dimension": "bug",
+  "lang": "python",
+  "difficulty": "hard",
+  "title": "修复区间合并在大规模下超时",
+  "ref_minutes": 40,
+  "grader": "tests",
+  "allowed_paths": ["booking/**/*.py"]
+}

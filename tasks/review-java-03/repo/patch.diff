@@ -1,0 +1,32 @@
+--- a/yardorder/YardOrder.java
++++ b/yardorder/YardOrder.java
+@@ -2,7 +2,7 @@
+ 
+ import java.util.Objects;
+ 
+-/** 堆场订单。相等只看单号。 */
++/** 堆场订单。相等要同时看单号和箱区。 */
+ public final class YardOrder {
+     private final String id;
+     private String zone;
+@@ -20,9 +20,9 @@
+         return zone;
+     }
+ 
+-    /** 把订单改到新箱区并交给存储。 */
++    /** 把订单改到新箱区并交给存储。存储的是改完后的箱区。 */
+     public void relocate(String zone, OrderStore store) {
+-        this.zone = ZoneNames.normalize(zone);
++        zone = ZoneNames.normalize(zone);
+         store.save(this.id, this.zone);
+     }
+ 
+@@ -35,7 +35,7 @@
+             return false;
+         }
+         YardOrder other = (YardOrder) obj;
+-        return Objects.equals(id, other.id);
++        return Objects.equals(id, other.id) && Objects.equals(zone, other.zone);
+     }
+ 
+     @Override

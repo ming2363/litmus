@@ -1,0 +1,10 @@
+{
+  "id": "read-py-03",
+  "dimension": "read_code",
+  "lang": "python",
+  "difficulty": "medium",
+  "title": "胸卡编码落库前的转换链",
+  "ref_minutes": 35,
+  "grader": "read_code",
+  "answer_file": "answer.json"
+}

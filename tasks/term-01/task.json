@@ -1,0 +1,9 @@
+{
+  "id": "term-01",
+  "dimension": "terminal",
+  "lang": "none",
+  "difficulty": "easy",
+  "title": "按规则批量规范重命名归档文件",
+  "ref_minutes": 5,
+  "grader": "terminal"
+}

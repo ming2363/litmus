@@ -1,0 +1,6 @@
+id,date,category,kind,amount_cents,note
+E001,2026-03-01,salary,income,1200000,三月工资
+E002,2026-03-05,food,expense,4850,工作餐
+E003,2026-03-10,food,expense,12600,聚餐
+E004,2026-03-12,transport,expense,2400,地铁充值
+E005,2026-03-15,bonus,income,300000,绩效奖金

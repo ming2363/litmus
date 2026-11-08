@@ -1,0 +1,10 @@
+{
+  "id": "review-py-03",
+  "dimension": "review",
+  "lang": "python",
+  "difficulty": "medium",
+  "title": "航次校验的回溯与越界",
+  "ref_minutes": 25,
+  "grader": "review",
+  "answer_file": "review.json"
+}

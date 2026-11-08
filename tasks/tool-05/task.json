@@ -1,0 +1,10 @@
+{
+  "id": "tool-05",
+  "dimension": "tool_call",
+  "lang": "none",
+  "difficulty": "medium",
+  "title": "多项互不依赖工具的集合匹配调用",
+  "ref_minutes": 8,
+  "grader": "tool_call",
+  "answer_file": "answer.json"
+}

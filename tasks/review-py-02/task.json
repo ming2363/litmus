@@ -1,0 +1,10 @@
+{
+  "id": "review-py-02",
+  "dimension": "review",
+  "lang": "python",
+  "difficulty": "medium",
+  "title": "台账查询的注入与漏改调用",
+  "ref_minutes": 25,
+  "grader": "review",
+  "answer_file": "review.json"
+}

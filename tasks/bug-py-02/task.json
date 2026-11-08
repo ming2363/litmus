@@ -1,0 +1,10 @@
+{
+  "id": "bug-py-02",
+  "dimension": "bug",
+  "lang": "python",
+  "difficulty": "medium",
+  "title": "修复门店报表的空值与外连接",
+  "ref_minutes": 25,
+  "grader": "tests",
+  "allowed_paths": ["ledger/**/*.py"]
+}

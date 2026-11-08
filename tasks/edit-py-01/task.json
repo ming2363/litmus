@@ -1,0 +1,11 @@
+{
+  "id": "edit-py-01",
+  "dimension": "edit",
+  "lang": "python",
+  "difficulty": "easy",
+  "title": "修改客户端默认超时并增加参数范围校验",
+  "ref_minutes": 5,
+  "grader": "tests",
+  "allowed_paths": ["src/client.py"],
+  "max_changed_lines": 20
+}

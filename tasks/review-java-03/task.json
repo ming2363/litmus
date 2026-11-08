@@ -1,0 +1,10 @@
+{
+  "id": "review-java-03",
+  "dimension": "review",
+  "lang": "java",
+  "difficulty": "medium",
+  "title": "堆场订单的遮蔽与相等契约",
+  "ref_minutes": 25,
+  "grader": "review",
+  "answer_file": "review.json"
+}

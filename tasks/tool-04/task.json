@@ -1,0 +1,10 @@
+{
+  "id": "tool-04",
+  "dimension": "tool_call",
+  "lang": "none",
+  "difficulty": "medium",
+  "title": "相对日期与跨月日历换算调用",
+  "ref_minutes": 8,
+  "grader": "tool_call",
+  "answer_file": "answer.json"
+}

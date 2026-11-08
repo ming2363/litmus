@@ -1,0 +1,11 @@
+{
+  "id": "edit-py-02",
+  "dimension": "edit",
+  "lang": "python",
+  "difficulty": "medium",
+  "title": "为关税运费计算函数增加可选缓存并保持签名兼容",
+  "ref_minutes": 12,
+  "grader": "tests",
+  "allowed_paths": ["src/pricing.py"],
+  "max_changed_lines": 35
+}

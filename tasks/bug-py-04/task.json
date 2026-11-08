@@ -1,0 +1,10 @@
+{
+  "id": "bug-py-04",
+  "dimension": "bug",
+  "lang": "python",
+  "difficulty": "medium",
+  "title": "修复按字素截断文本",
+  "ref_minutes": 25,
+  "grader": "tests",
+  "allowed_paths": ["snippets/**/*.py"]
+}

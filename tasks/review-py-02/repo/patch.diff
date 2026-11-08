@@ -1,0 +1,51 @@
+--- a/shiftledger/daily.py
++++ b/shiftledger/daily.py
+@@ -1,10 +1,10 @@
+-"""白班汇总。"""
++"""白班汇总，已改成占位符。"""
+ 
+ from shiftledger.query import where_shift
+ 
+ 
+ def daily(conn, shift_id):
+     """汇总一个班次。"""
+-    clause = where_shift(shift_id)
++    clause, params = where_shift(shift_id)
+     sql = "SELECT id, amount FROM ledger_entry WHERE " + clause
+-    return conn.execute(sql).fetchall()
++    return conn.execute(sql, params).fetchall()
+--- a/shiftledger/jobs.py
++++ b/shiftledger/jobs.py
+@@ -4,7 +4,7 @@
+ 
+ 
+ def nightly(conn, shift_id):
+-    """汇总一个班次。"""
++    """汇总一个班次，供凌晨任务调用。"""
+     clause = where_shift(shift_id)
+     sql = "SELECT id, amount FROM ledger_entry WHERE " + clause
+     return conn.execute(sql).fetchall()
+--- a/shiftledger/query.py
++++ b/shiftledger/query.py
+@@ -1,8 +1,8 @@
+-"""班次条件。旧实现把值拼进 SQL。"""
++"""班次条件。"""
+ 
+ 
+ def where_shift(shift_id):
+-    """返回一整段 SQL。"""
++    """返回 SQL 片段和参数。片段只含占位符。"""
+     if not isinstance(shift_id, str) or not shift_id.strip():
+         raise ValueError("shift_id")
+-    return "shift_id = '{}'".format(shift_id.strip())
++    return ("shift_id = ?", [shift_id.strip()])
+--- a/shiftledger/search.py
++++ b/shiftledger/search.py
+@@ -3,5 +3,5 @@
+ 
+ def fetch_by_note(conn, note):
+     """note 来自查询框。"""
+-    sql = "SELECT id, note FROM ledger_entry WHERE note LIKE ?"
+-    return conn.execute(sql, ["%{}%".format(note)]).fetchall()
++    sql = "SELECT id, note FROM ledger_entry WHERE note LIKE '%{}%'".format(note)
++    return conn.execute(sql).fetchall()

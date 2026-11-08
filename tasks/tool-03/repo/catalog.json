@@ -1,0 +1,20 @@
+[
+  {
+    "name": "ErgoDock Lite",
+    "sku": "SKU-EDL-01",
+    "stock": 0,
+    "status": "discontinued"
+  },
+  {
+    "name": "ErgoDock Pro",
+    "sku": "SKU-EDP-02",
+    "stock": 14,
+    "status": "active"
+  },
+  {
+    "name": "ErgoDock Pro Max (Beta)",
+    "sku": "SKU-EDP-99",
+    "stock": 0,
+    "status": "internal_test"
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "id": "bug-py-06",
+  "dimension": "bug",
+  "lang": "python",
+  "difficulty": "hard",
+  "title": "修复下单失败后的库存预占泄漏",
+  "ref_minutes": 40,
+  "grader": "tests",
+  "allowed_paths": ["warehouse/**/*.py"]
+}

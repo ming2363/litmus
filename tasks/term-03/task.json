@@ -1,0 +1,9 @@
+{
+  "id": "term-03",
+  "dimension": "terminal",
+  "lang": "none",
+  "difficulty": "medium",
+  "title": "修复损坏的发布打包脚本 build.sh",
+  "ref_minutes": 10,
+  "grader": "terminal"
+}

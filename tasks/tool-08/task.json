@@ -1,0 +1,10 @@
+{
+  "id": "tool-08",
+  "dimension": "tool_call",
+  "lang": "none",
+  "difficulty": "hard",
+  "title": "从 26 个相似工具中精确选型与枚举映射",
+  "ref_minutes": 14,
+  "grader": "tool_call",
+  "answer_file": "answer.json"
+}

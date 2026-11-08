@@ -1,0 +1,27 @@
+--- a/lanesign/parse.py
++++ b/lanesign/parse.py
+@@ -3,7 +3,8 @@
+ import re
+ 
+ 
+-CALL_SIGN = re.compile(r"^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$")
++# 航次号由字母数字段组成，段之间可以有连字符。
++CALL_SIGN = re.compile(r"^(([A-Za-z0-9]+-?)+)+$")
+ 
+ 
+ def looks_like_call_sign(text):
+@@ -14,8 +15,11 @@
+ 
+ 
+ def lane_tail(note):
+-    """没有连字符时返回空串。"""
++    """取连字符后面的那段。note 可能没有连字符。"""
+     parts = [part for part in note.split("-") if part]
+-    if len(parts) < 2:
+-        return ""
+     return parts[1]
++
++
++def describe(note):
++    """同时给出是否像航次号，以及后段。"""
++    return {"ok": looks_like_call_sign(note), "tail": lane_tail(note)}

@@ -1,0 +1,41 @@
+{
+  "target_version": "4.10.0",
+  "sources": [
+    {
+      "archive": "z-mirror-4.10.0.zip",
+      "version": "4.10.0",
+      "rank": 50,
+      "strip_prefix": ""
+    },
+    {
+      "archive": "draft-10.0.0.tar.gz",
+      "version": "10.0.0",
+      "rank": 200,
+      "strip_prefix": "payload"
+    },
+    {
+      "archive": "base-4.2.0.tar.gz",
+      "version": "4.2.0",
+      "rank": 10,
+      "strip_prefix": "payload"
+    },
+    {
+      "archive": "a-official-4.10.0.tar.gz",
+      "version": "4.10.0",
+      "rank": 100,
+      "strip_prefix": "release"
+    },
+    {
+      "archive": "bridge-labeled-4.2.zip",
+      "version": "4.9.0",
+      "rank": 30,
+      "strip_prefix": "tree"
+    },
+    {
+      "archive": "priority-4.2.0.tar.gz",
+      "version": "4.2.0",
+      "rank": 90,
+      "strip_prefix": "payload"
+    }
+  ]
+}

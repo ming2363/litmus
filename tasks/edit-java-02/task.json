@@ -1,0 +1,16 @@
+{
+  "id": "edit-java-02",
+  "dimension": "edit",
+  "lang": "java",
+  "difficulty": "medium",
+  "title": "仅将 ConfigRepository.findByKey 的 null 返回重构为 Optional 并适配调用点",
+  "ref_minutes": 15,
+  "grader": "tests",
+  "allowed_paths": [
+    "src/com/litmus/config/ConfigRepository.java",
+    "src/com/litmus/config/ConfigService.java",
+    "src/com/litmus/config/FeatureFlagResolver.java",
+    "src/com/litmus/config/DeploymentAuditHelper.java"
+  ],
+  "max_changed_lines": 45
+}

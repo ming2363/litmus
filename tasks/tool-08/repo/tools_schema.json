@@ -1,0 +1,694 @@
+[
+  {
+    "name": "metrics_query_timeseries",
+    "description": "查询指定指标的时序点数据",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "service": {
+          "type": "string"
+        },
+        "metric_name": {
+          "type": "string",
+          "enum": [
+            "cpu_pct",
+            "mem_mb",
+            "error_rate",
+            "p99_latency_ms"
+          ]
+        },
+        "eval_window": {
+          "type": "string",
+          "enum": [
+            "5m",
+            "15m",
+            "1h",
+            "24h"
+          ]
+        }
+      },
+      "required": [
+        "service",
+        "metric_name",
+        "eval_window"
+      ]
+    }
+  },
+  {
+    "name": "metrics_query_percentile",
+    "description": "查询实时分位值快照",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "service": {
+          "type": "string"
+        },
+        "percentile": {
+          "type": "string",
+          "enum": [
+            "p50",
+            "p95",
+            "p99"
+          ]
+        }
+      },
+      "required": [
+        "service",
+        "percentile"
+      ]
+    }
+  },
+  {
+    "name": "metrics_export_csv",
+    "description": "导出历史监控指标为 CSV",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "service": {
+          "type": "string"
+        },
+        "range_days": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "service",
+        "range_days"
+      ]
+    }
+  },
+  {
+    "name": "metrics_create_recording_rule",
+    "description": "创建预聚合录制规则",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "rule_name": {
+          "type": "string"
+        },
+        "source_metric": {
+          "type": "string"
+        },
+        "eval_window": {
+          "type": "string",
+          "enum": [
+            "1m",
+            "5m",
+            "15m"
+          ]
+        }
+      },
+      "required": [
+        "rule_name",
+        "source_metric",
+        "eval_window"
+      ]
+    }
+  },
+  {
+    "name": "alerts_create_threshold_rule",
+    "description": "新建静态阈值告警规则（用于固定指标上下限触发告警）",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "service": {
+          "type": "string"
+        },
+        "region": {
+          "type": "string",
+          "enum": [
+            "ap-southeast-1",
+            "eu-central-1",
+            "us-east-1"
+          ]
+        },
+        "metric_stat": {
+          "type": "string",
+          "enum": [
+            "p50_latency_ms",
+            "p95_latency_ms",
+            "p99_latency_ms",
+            "error_ratio_pct"
+          ]
+        },
+        "comparator": {
+          "type": "string",
+          "enum": [
+            "gt",
+            "gte",
+            "lt",
+            "lte"
+          ]
+        },
+        "threshold_value": {
+          "type": "integer"
+        },
+        "eval_window": {
+          "type": "string",
+          "enum": [
+            "5m",
+            "15m",
+            "30m",
+            "1h"
+          ]
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "sev1_critical",
+            "sev2_major",
+            "sev3_minor"
+          ]
+        },
+        "notify_route": {
+          "type": "string",
+          "enum": [
+            "pagerduty_core_sre",
+            "slack_ops_warn",
+            "email_digest"
+          ]
+        }
+      },
+      "required": [
+        "service",
+        "region",
+        "metric_stat",
+        "comparator",
+        "threshold_value",
+        "eval_window",
+        "severity",
+        "notify_route"
+      ]
+    }
+  },
+  {
+    "name": "alerts_create_anomaly_rule",
+    "description": "新建基于机器学习基线的动态异常检测告警规则",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "service": {
+          "type": "string"
+        },
+        "metric_stat": {
+          "type": "string",
+          "enum": [
+            "p95_latency_ms",
+            "p99_latency_ms",
+            "error_ratio_pct"
+          ]
+        },
+        "sensitivity": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "sev1_critical",
+            "sev2_major",
+            "sev3_minor"
+          ]
+        }
+      },
+      "required": [
+        "service",
+        "metric_stat",
+        "sensitivity",
+        "severity"
+      ]
+    }
+  },
+  {
+    "name": "alerts_update_threshold_rule",
+    "description": "修改已有静态阈值告警规则的阈值",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "rule_id": {
+          "type": "string"
+        },
+        "threshold_value": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "rule_id",
+        "threshold_value"
+      ]
+    }
+  },
+  {
+    "name": "alerts_silence_matcher",
+    "description": "按标签临时静默已有告警通知",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "service": {
+          "type": "string"
+        },
+        "duration_minutes": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "service",
+        "duration_minutes"
+      ]
+    }
+  },
+  {
+    "name": "alerts_delete_rule",
+    "description": "删除已不再使用的告警规则",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "rule_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule_id"
+      ]
+    }
+  },
+  {
+    "name": "logs_search_structured",
+    "description": "检索结构化服务日志",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "service": {
+          "type": "string"
+        },
+        "level": {
+          "type": "string",
+          "enum": [
+            "DEBUG",
+            "INFO",
+            "WARN",
+            "ERROR"
+          ]
+        }
+      },
+      "required": [
+        "service",
+        "level"
+      ]
+    }
+  },
+  {
+    "name": "logs_create_exclusion_filter",
+    "description": "创建日志丢弃过滤规则",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "service": {
+          "type": "string"
+        },
+        "pattern": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "service",
+        "pattern"
+      ]
+    }
+  },
+  {
+    "name": "logs_export_archive",
+    "description": "导出日志到冷存储归档",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "service": {
+          "type": "string"
+        },
+        "bucket": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "service",
+        "bucket"
+      ]
+    }
+  },
+  {
+    "name": "traces_query_latency_outliers",
+    "description": "查询分布式链路追踪慢请求样本",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "service": {
+          "type": "string"
+        },
+        "min_duration_ms": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "service",
+        "min_duration_ms"
+      ]
+    }
+  },
+  {
+    "name": "traces_sample_policy_update",
+    "description": "调整链路追踪采样率策略",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "service": {
+          "type": "string"
+        },
+        "sample_rate_pct": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "service",
+        "sample_rate_pct"
+      ]
+    }
+  },
+  {
+    "name": "incidents_declare_incident",
+    "description": "正式拉起一条新的线上事故单",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "service": {
+          "type": "string"
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "sev1_critical",
+            "sev2_major",
+            "sev3_minor"
+          ]
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "service",
+        "severity",
+        "title"
+      ]
+    }
+  },
+  {
+    "name": "incidents_page_escalation_policy",
+    "description": "立即触发升级值班人员电话告警",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "escalation_policy": {
+          "type": "string",
+          "enum": [
+            "core_sre_l1",
+            "core_sre_l2",
+            "db_oncall"
+          ]
+        }
+      },
+      "required": [
+        "escalation_policy"
+      ]
+    }
+  },
+  {
+    "name": "incidents_attach_timeline_event",
+    "description": "向已有事故单追加时间线事件",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "incident_id": {
+          "type": "string"
+        },
+        "event_type": {
+          "type": "string",
+          "enum": [
+            "detection",
+            "mitigation",
+            "resolution"
+          ]
+        }
+      },
+      "required": [
+        "incident_id",
+        "event_type"
+      ]
+    }
+  },
+  {
+    "name": "rollouts_pause_canary",
+    "description": "暂停金丝雀灰度放量（保持当前流量比例并冻结观察，不回滚也不晋升）",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "service": {
+          "type": "string"
+        },
+        "region": {
+          "type": "string",
+          "enum": [
+            "ap-southeast-1",
+            "eu-central-1",
+            "us-east-1"
+          ]
+        },
+        "pause_reason": {
+          "type": "string",
+          "enum": [
+            "latency_regression_investigation",
+            "error_budget_exhausted",
+            "dependency_maintenance"
+          ]
+        },
+        "preserve_metrics_window": {
+          "type": "string",
+          "enum": [
+            "5m",
+            "15m",
+            "30m"
+          ]
+        }
+      },
+      "required": [
+        "service",
+        "region",
+        "pause_reason",
+        "preserve_metrics_window"
+      ]
+    }
+  },
+  {
+    "name": "rollouts_rollback_revision",
+    "description": "将发布立即回滚到上一个稳定版本",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "service": {
+          "type": "string"
+        },
+        "region": {
+          "type": "string",
+          "enum": [
+            "ap-southeast-1",
+            "eu-central-1",
+            "us-east-1"
+          ]
+        },
+        "target_revision": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "service",
+        "region",
+        "target_revision"
+      ]
+    }
+  },
+  {
+    "name": "rollouts_promote_canary",
+    "description": "将当前金丝雀发布全量晋升至 100% 流量",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "service": {
+          "type": "string"
+        },
+        "region": {
+          "type": "string",
+          "enum": [
+            "ap-southeast-1",
+            "eu-central-1",
+            "us-east-1"
+          ]
+        }
+      },
+      "required": [
+        "service",
+        "region"
+      ]
+    }
+  },
+  {
+    "name": "quotas_request_limit_increase",
+    "description": "提交云资源硬配额上限扩容申请",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "cost_center": {
+          "type": "string"
+        },
+        "resource_type": {
+          "type": "string",
+          "enum": [
+            "vcpu",
+            "gpu",
+            "egress_gbps"
+          ]
+        },
+        "requested_limit": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "cost_center",
+        "resource_type",
+        "requested_limit"
+      ]
+    }
+  },
+  {
+    "name": "quotas_inspect_service_usage",
+    "description": "查看服务当前配额占用率",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "service": {
+          "type": "string"
+        },
+        "region": {
+          "type": "string",
+          "enum": [
+            "ap-southeast-1",
+            "eu-central-1",
+            "us-east-1"
+          ]
+        }
+      },
+      "required": [
+        "service",
+        "region"
+      ]
+    }
+  },
+  {
+    "name": "budgets_create_forecast_alert",
+    "description": "创建基于成本预测的预算超支预警规则（仅告警不限流）",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "cost_center": {
+          "type": "string"
+        },
+        "forecast_basis": {
+          "type": "string",
+          "enum": [
+            "weekly_run_rate",
+            "end_of_month_projected",
+            "quarterly_commit"
+          ]
+        },
+        "threshold_pct": {
+          "type": "integer"
+        },
+        "billing_scope": {
+          "type": "string",
+          "enum": [
+            "compute_only",
+            "storage_only",
+            "compute_and_egress",
+            "all_charges"
+          ]
+        },
+        "alert_channel": {
+          "type": "string",
+          "enum": [
+            "slack_finops_alerts",
+            "email_budget_owners",
+            "pagerduty_core_sre"
+          ]
+        }
+      },
+      "required": [
+        "cost_center",
+        "forecast_basis",
+        "threshold_pct",
+        "billing_scope",
+        "alert_channel"
+      ]
+    }
+  },
+  {
+    "name": "budgets_apply_throttle_cap",
+    "description": "对成本中心施加超额硬限流封顶策略",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "cost_center": {
+          "type": "string"
+        },
+        "monthly_cap_usd": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "cost_center",
+        "monthly_cap_usd"
+      ]
+    }
+  },
+  {
+    "name": "snapshots_trigger_backup",
+    "description": "立即触发一次手动磁盘快照",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "volume_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "volume_id"
+      ]
+    }
+  },
+  {
+    "name": "snapshots_verify_checksum",
+    "description": "校验已有快照的完整性摘要",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "snapshot_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "snapshot_id"
+      ]
+    }
+  }
+]
