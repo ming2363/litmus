@@ -1,4 +1,4 @@
-"""做题端命令行实现：start / next / check / submit / skip / status（严禁提及出题工具）。"""
+"""做题端命令行实现：start / next / check / submit / skip / status / report（严禁提及出题工具）。"""
 
 import argparse
 import json
@@ -6,7 +6,7 @@ import os
 import shutil
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from litmus.crypto import CryptoError, unseal_to
 from litmus.diffcheck import find_symlinks
@@ -14,6 +14,7 @@ from litmus.envcheck import run_env_checks
 from litmus.graders import grade
 from litmus.integrity import append_audit, check_run_integrity, get_git_head
 from litmus.paths import answers_dir, find_repo_root, grade_root_dir
+from litmus.report import generate_and_write_report
 from litmus.state import (
     create_run,
     load_active_state,
@@ -385,6 +386,25 @@ def _cmd_status(root: Path) -> int:
         return 0
 
 
+def _cmd_report(root: Path, usage_kwargs: Optional[Dict[str, Any]] = None) -> int:
+    with state_lock(root):
+        active = load_active_state(root)
+        if active is None:
+            print("当前没有可生成报告的测评记录。")
+            print("下一步：执行 python3 litmus.py start")
+            return 1
+        run_dir, state = active
+        _, md_text, md_path, json_path = generate_and_write_report(
+            run_dir, state, root=root, usage_kwargs=usage_kwargs
+        )
+        print(md_text, end="")
+        print("报告文件已写入：")
+        print("- {}".format(md_path))
+        print("- {}".format(json_path))
+        print("下一步：测评报告已生成，请将报告内容原样提交给测评发起人")
+        return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="litmus.py",
@@ -399,6 +419,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("submit", help="提交并判分当前题")
     sub.add_parser("skip", help="放弃当前题并按不通过计分")
     sub.add_parser("status", help="查看当前测评进度")
+    sub.add_parser("report", help="汇总成绩并写入 reports/ 目录")
     return parser
 
 
@@ -406,6 +427,7 @@ def main(
     argv: Optional[List[str]] = None,
     root: Optional[Path] = None,
     ai_relay_mode_file: Optional[Path] = None,
+    usage_kwargs: Optional[Dict[str, Any]] = None,
 ) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -423,6 +445,8 @@ def main(
         return _cmd_skip(repo_root)
     if args.command == "status":
         return _cmd_status(repo_root)
+    if args.command == "report":
+        return _cmd_report(repo_root, usage_kwargs=usage_kwargs)
 
     parser.print_help()
     print("下一步：执行 python3 litmus.py start")
