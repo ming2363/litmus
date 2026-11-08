@@ -1,0 +1,9 @@
+{
+  "id": "term-py-01",
+  "dimension": "terminal",
+  "lang": "none",
+  "difficulty": "easy",
+  "title": "生成排序去重后的输出文件",
+  "ref_minutes": 5,
+  "grader": "terminal"
+}

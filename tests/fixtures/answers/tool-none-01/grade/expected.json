@@ -1,0 +1,16 @@
+{
+  "ordered": true,
+  "calls": [
+    {
+      "name": "query_events",
+      "args": {
+        "date": "2026-11-08",
+        "team": "core"
+      }
+    }
+  ],
+  "normalize": {
+    "date": ["strip", "date"],
+    "team": ["strip", "lower"]
+  }
+}

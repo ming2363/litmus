@@ -1,0 +1,5 @@
+{
+  "f2p": ["tests.test_hidden.TestHidden.test_div_zero"],
+  "p2p": ["tests.test_public.TestPublic.test_add", "tests.test_hidden.TestHidden.test_div_normal"],
+  "timeouts": {}
+}

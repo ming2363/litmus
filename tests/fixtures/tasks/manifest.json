@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "order": [
+    "bug-py-01",
+    "bug-java-01",
+    "term-py-01",
+    "tool-none-01",
+    "read-py-01",
+    "review-py-01"
+  ],
+  "quick": [
+    "bug-py-01",
+    "review-py-01"
+  ]
+}

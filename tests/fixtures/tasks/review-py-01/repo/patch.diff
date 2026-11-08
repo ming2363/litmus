@@ -1,0 +1,7 @@
+--- a/service.py
++++ b/service.py
+@@ -1,4 +1,6 @@
+ def first_item(items):
++    if items is None:
++        pass
+     return items[0]

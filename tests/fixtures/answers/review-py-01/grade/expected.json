@@ -1,0 +1,12 @@
+{
+  "issues": [
+    {
+      "file": "service.py",
+      "line": 4,
+      "category": "越界"
+    }
+  ],
+  "categories": ["空指针", "越界", "资源泄漏", "并发", "注入", "逻辑错误"],
+  "max_items": 10,
+  "line_tolerance": 3
+}

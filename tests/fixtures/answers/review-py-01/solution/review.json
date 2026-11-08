@@ -1,0 +1,8 @@
+[
+  {
+    "file": "service.py",
+    "line": 4,
+    "category": "越界",
+    "description": "items 为空列表或 None 时直接索引 items[0] 会越界/报错"
+  }
+]

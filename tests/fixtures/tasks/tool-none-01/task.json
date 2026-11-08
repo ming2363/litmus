@@ -1,0 +1,10 @@
+{
+  "id": "tool-none-01",
+  "dimension": "tool_call",
+  "lang": "none",
+  "difficulty": "easy",
+  "title": "工具调用参数归一化与防诱导",
+  "ref_minutes": 5,
+  "grader": "tool_call",
+  "answer_file": "answer.json"
+}

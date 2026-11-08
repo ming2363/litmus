@@ -1,0 +1,10 @@
+{
+  "id": "review-py-01",
+  "dimension": "review",
+  "lang": "python",
+  "difficulty": "easy",
+  "title": "审查空值与越界缺陷",
+  "ref_minutes": 5,
+  "grader": "review",
+  "answer_file": "review.json"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "read-py-01",
+  "dimension": "read_code",
+  "lang": "python",
+  "difficulty": "easy",
+  "title": "追踪事件分发调用链",
+  "ref_minutes": 5,
+  "grader": "read_code",
+  "answer_file": "answer.json"
+}

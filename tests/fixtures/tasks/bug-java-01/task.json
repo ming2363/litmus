@@ -1,0 +1,10 @@
+{
+  "id": "bug-java-01",
+  "dimension": "bug",
+  "lang": "java",
+  "difficulty": "easy",
+  "title": "修复 Java 乘法溢出与符号处理",
+  "ref_minutes": 5,
+  "grader": "tests",
+  "allowed_paths": ["Calc.java"]
+}

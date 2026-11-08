@@ -1,0 +1,11 @@
+{
+  "id": "bug-py-01",
+  "dimension": "bug",
+  "lang": "python",
+  "difficulty": "easy",
+  "title": "修复除法截断符号缺陷",
+  "ref_minutes": 5,
+  "grader": "tests",
+  "allowed_paths": ["src/*.py"],
+  "max_changed_lines": 5
+}
