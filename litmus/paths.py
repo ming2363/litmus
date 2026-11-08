@@ -99,7 +99,7 @@ def grade_root_dir(run_dir: Path) -> Path:
     return Path(run_dir) / GRADE_WORKDIR_NAME
 
 
-def _strip_rel_prefix(rel_path: str) -> str:
+def strip_rel_prefix(rel_path: str) -> str:
     """去掉相对路径开头的 ./ 与 /，保留 .DS_Store、.git 这类点文件名。
 
     不能用 str.lstrip("./")：它按字符集合剥离，会把 .DS_Store 变成 DS_Store。
@@ -114,7 +114,7 @@ def _strip_rel_prefix(rel_path: str) -> str:
 
 def is_ignored_relpath(rel_path: str) -> bool:
     """判断相对路径是否属于构建产物或工具忽略文件。"""
-    cleaned = _strip_rel_prefix(rel_path)
+    cleaned = strip_rel_prefix(rel_path)
     if not cleaned:
         return False
     parts = PurePosixPath(cleaned).parts

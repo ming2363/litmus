@@ -68,6 +68,41 @@ class TestDiffcheckAndStats(unittest.TestCase):
         self.assertTrue(is_visible_test_file("src/test/CalcTest.java"))
         self.assertFalse(is_visible_test_file("src/calc.py"))
 
+    def test_prefix_strip_keeps_dotfiles_and_parent_segments(self):
+        # lstrip("./") 会按字符集合剥离，把 .DS_Store 收成 DS_Store
+        self.assertTrue(glob_match(".DS_Store", ".DS_Store"))
+        self.assertFalse(glob_match(".DS_Store", "DS_Store"))
+        self.assertFalse(glob_match("DS_Store", ".DS_Store"))
+        self.assertTrue(glob_match("./src/app.py", "src/*.py"))
+        self.assertTrue(glob_match(".\\src\\app.py", "src/*.py"))
+        # ../ 不能被吃掉后误匹配允许路径
+        self.assertFalse(glob_match("../src/app.py", "src/*.py"))
+        self.assertFalse(glob_match("../src/app.py", "src/app.py"))
+        # 点开头的文件名不能被收成 test_* 后误判为可见测试
+        self.assertFalse(is_visible_test_file(".test_secret.py"))
+        self.assertFalse(is_visible_test_file(".TestSecret.java"))
+        self.assertTrue(is_visible_test_file("./tests/test_app.py"))
+        self.assertTrue(is_visible_test_file("././src/test/CalcTest.java"))
+
+    def test_parent_segments_are_outside_allowed_paths(self):
+        # 即使字面量相等或 ** 能配上，含 .. 段也一律越界
+        self.assertEqual(
+            check_allowed_paths(["src/../src/app.py"], ["src/../src/app.py"]),
+            ["src/../src/app.py"],
+        )
+        self.assertEqual(
+            check_allowed_paths(["src/../src/app.py"], ["**/*.py"]),
+            ["src/../src/app.py"],
+        )
+        self.assertEqual(
+            check_allowed_paths(["../src/app.py", "src/ok.py"], ["src/*.py"]),
+            ["../src/app.py"],
+        )
+        self.assertEqual(
+            check_allowed_paths(["./src/ok.py", "src\\sub\\..\\app.py"], ["src/*.py"]),
+            ["src\\sub\\..\\app.py"],
+        )
+
     def test_wilson_interval(self):
         self.assertEqual(wilson_interval(0, 0), (0.0, 0.0))
         low, high = wilson_interval(8, 10)

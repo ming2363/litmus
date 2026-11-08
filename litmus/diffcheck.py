@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Dict, List, Optional, Sequence
 
-from litmus.paths import is_ignored_relpath
+from litmus.paths import is_ignored_relpath, strip_rel_prefix
 
 
 class DiffError(Exception):
@@ -129,7 +129,7 @@ def compare_dirs(repo_dir: Path, workdir: Path) -> DiffSummary:
 
 
 def _glob_to_regex(pattern: str) -> str:
-    pat = pattern.replace("\\", "/").lstrip("./")
+    pat = strip_rel_prefix(pattern)
     parts = ["^"]
     i = 0
     n = len(pat)
@@ -153,10 +153,16 @@ def _glob_to_regex(pattern: str) -> str:
     return "".join(parts)
 
 
+def _has_parent_segment(rel_path: str) -> bool:
+    """路径段里出现 .. 时视为越界，避免被 glob 或前缀剥离绕过。"""
+    cleaned = strip_rel_prefix(rel_path)
+    return ".." in PurePosixPath(cleaned).parts
+
+
 def glob_match(rel_path: str, pattern: str) -> bool:
     """按 POSIX 路径语义匹配 glob 规则（* 不跨目录，** 跨目录）。"""
-    norm_path = rel_path.replace("\\", "/").lstrip("./")
-    norm_pat = pattern.replace("\\", "/").lstrip("./")
+    norm_path = strip_rel_prefix(rel_path)
+    norm_pat = strip_rel_prefix(pattern)
     if norm_path == norm_pat:
         return True
     regex = _glob_to_regex(norm_pat)
@@ -169,14 +175,14 @@ def check_allowed_paths(
     """返回不在 allowed_paths 范围内的越界修改文件列表。"""
     violations: List[str] = []
     for rel in changed_files:
-        if not any(glob_match(rel, pat) for pat in allowed_patterns):
+        if _has_parent_segment(rel) or not any(glob_match(rel, pat) for pat in allowed_patterns):
             violations.append(rel)
     return sorted(violations)
 
 
 def is_visible_test_file(rel_path: str) -> bool:
     """判断起始代码中的文件是否属于可见测试文件。"""
-    norm = rel_path.replace("\\", "/").lstrip("./")
+    norm = strip_rel_prefix(rel_path)
     posix = PurePosixPath(norm)
     parts = posix.parts
     if "tests" in parts[:-1] or "test" in parts[:-1]:
