@@ -121,8 +121,9 @@ def collect_opencode(
         if not isinstance(cache, dict):
             cache = {}
         inp = safe_int(tokens.get("input") or 0)
-        out = safe_int(tokens.get("output") or 0)
         reasoning = safe_int(tokens.get("reasoning") or 0)
+        # 统一口径：OpenCode 的 tokens.output 不含 reasoning，记入 output 时加上 reasoning
+        out = safe_int(tokens.get("output") or 0) + reasoning
         c_read = safe_int(cache.get("read") or 0)
         c_write = safe_int(cache.get("write") or 0)
 

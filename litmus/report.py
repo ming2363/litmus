@@ -4,13 +4,14 @@ import json
 import re
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from litmus.integrity import check_audit_during_run, check_run_integrity
 from litmus.paths import get_repo_root, reports_dir
+from litmus.scoring import DIFFICULTY_WEIGHTS, compute_scores
 from litmus.state import atomic_write_text, now_iso, parse_iso
 from litmus.stats import wilson_interval
-from litmus.tasks import TaskSpec, load_all_tasks
+from litmus.tasks import VALID_DIFFICULTIES, TaskSpec, compute_bank_version, load_all_tasks
 from litmus.usage import UsageSummary, collect
 
 
@@ -37,7 +38,11 @@ def build_report_filename_stem(
     return "{}-{}-{}".format(stamp, tool, model)
 
 
-def _group_stats(records: List[Dict[str, Any]], key: str) -> List[Dict[str, Any]]:
+def _group_stats(
+    records: List[Dict[str, Any]],
+    key: str,
+    key_order: Optional[Sequence[str]] = None,
+) -> List[Dict[str, Any]]:
     groups: Dict[str, List[bool]] = defaultdict(list)
     order_keys: List[str] = []
     for rec in records:
@@ -45,6 +50,10 @@ def _group_stats(records: List[Dict[str, Any]], key: str) -> List[Dict[str, Any]
         if k not in groups:
             order_keys.append(k)
         groups[k].append(bool(rec["passed"]))
+
+    if key_order is not None:
+        key_list = list(key_order)
+        order_keys.sort(key=lambda k: key_list.index(k) if k in key_list else 999)
 
     rows: List[Dict[str, Any]] = []
     for k in order_keys:
@@ -168,15 +177,40 @@ def build_report_data(
 
     filename_stem = build_report_filename_stem(state, usage_summary)
 
+    # 计算题库版本摘要与综合分
+    bank_version = compute_bank_version(root=repo)
+    score_result = compute_scores(task_rows, token_collected=usage_summary.collected)
+    by_task_scores = score_result.get("by_task", {})
+
+    # 将逐题明细回填到 task_rows，供逐题表渲染与机器可读导出
+    for row in task_rows:
+        detail = by_task_scores.get(row["id"])
+        if detail:
+            row["weight"] = detail["weight"]
+            row["credit"] = detail["credit"]
+            row["r"] = detail["r"]
+            row["time_score"] = detail["time_score"]
+            row["effective_tokens"] = detail["effective_tokens"]
+            row["token_score"] = detail["token_score"]
+        else:
+            row["weight"] = DIFFICULTY_WEIGHTS.get(row.get("difficulty", "easy"), 1)
+            row["credit"] = 1.0 if row["passed"] else 0.0
+            row["r"] = None
+            row["time_score"] = None
+            row["effective_tokens"] = None
+            row["token_score"] = None
+
     return {
         "report_id": filename_stem,
         "run_dir": state.get("run_dir"),
         "marker": state.get("marker"),
         "mode": state.get("mode"),
+        "bank_version": bank_version,
         "started_at": state.get("created_at"),
         "finished_at": finished_at,
         "litmus_commit": state.get("head"),
         "env": dict(state.get("env", {})),
+        "score": score_result,
         "validity": {
             "valid": len(invalid_reasons) == 0,
             "reasons": invalid_reasons,
@@ -194,7 +228,7 @@ def build_report_data(
             "wall_time_s": round(wall_s, 3),
         },
         "by_dimension": _group_stats(task_rows, "dimension"),
-        "by_difficulty": _group_stats(task_rows, "difficulty"),
+        "by_difficulty": _group_stats(task_rows, "difficulty", key_order=VALID_DIFFICULTIES),
         "interruptions": {
             "resume_count": len(resumes),
             "resumes": resumes,
@@ -221,17 +255,50 @@ def render_markdown(data: Dict[str, Any]) -> str:
     u = data["usage"]
     intr = data["interruptions"]
     env = data.get("env", {})
+    is_valid = bool(v.get("valid", True))
+    invalid_reasons = list(v.get("reasons", []))
+
+    score = data.get("score") or {}
+    composite = score.get("composite")
+    correctness = score.get("correctness")
+    time_score = score.get("time_score")
+    token_score = score.get("token_score")
+    efficiency = score.get("efficiency")
+    token_collected = bool(score.get("token_collected", True))
+
+    composite_str = "{:.2f}".format(composite) if composite is not None else "0.00"
+    if not is_valid:
+        invalid_suffix = "（无效：{}）".format("；".join(invalid_reasons)) if invalid_reasons else "（无效）"
+    else:
+        invalid_suffix = ""
+
+    corr_str = "{:.2f}".format(correctness) if correctness is not None else "0.00"
+    time_str = "{:.2f}".format(time_score) if time_score is not None else "无"
+    if not token_collected:
+        token_str = "未采集（效率系数只用时间分）"
+    elif token_score is not None:
+        token_str = "{:.2f}".format(token_score)
+    else:
+        token_str = "无"
+    eff_str = "{:.2f}".format(efficiency) if efficiency is not None else "无"
+
     lines: List[str] = [
         "# litmus 测评报告 ({})".format(data["report_id"]),
         "",
+        "## 综合分：{}{}".format(composite_str, invalid_suffix),
+        "- 正确性分：{} | 时间分：{} | token 分：{} | 效率系数：{}".format(
+            corr_str, time_str, token_str, eff_str
+        ),
+        "",
         "## 基本信息与有效性",
         "- 成绩有效性：**{}**{}".format(
-            "有效" if v["valid"] else "无效",
-            "" if v["valid"] else "（原因：{}）".format("；".join(v["reasons"])),
+            "有效" if is_valid else "无效",
+            "" if is_valid else "（原因：{}）".format("；".join(invalid_reasons)),
         ),
         "- 测评模式：{} | 运行目录：{} | 运行标记：{}".format(
             data["mode"], data["run_dir"], data["marker"]
         ),
+        "- 题库版本：`{}`".format(data.get("bank_version") or "unknown"),
         "- 工具名称：{} | 模型列表：{}".format(
             u["tool"] if u["collected"] else "未采集",
             ", ".join(u["models"].keys()) if u["models"] else ("未采集" if not u["collected"] else "unknown"),
@@ -336,11 +403,19 @@ def render_markdown(data: Dict[str, Any]) -> str:
     lines.extend([
         "",
         "## 逐题明细",
-        "| 序号 | 题号 | 维度 | 难度 | 状态 | 可合入性否决 | 耗时(s) | 参考(min) | 备注 |",
-        "|---|---|---|---|---|---|---|---|---|",
+        "| 序号 | 题号 | 维度 | 难度 | 状态 | 得分比例 | 可合入性否决 | 耗时(s) | 参考(min) | r | 时间得分 | 计费等价 token | token 得分 | 备注 |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
     ])
     for t in data["tasks"]:
         elapsed_str = "-" if t["elapsed_s"] is None else "{:.1f}".format(t["elapsed_s"])
+        r_str = "-" if t.get("r") is None else "{:.2f}".format(t["r"])
+        time_score_str = "-" if t.get("time_score") is None else "{:.2f}".format(t["time_score"])
+        eff_tokens_str = "-" if t.get("effective_tokens") is None else str(int(round(t["effective_tokens"])))
+        token_score_str = "-" if t.get("token_score") is None else "{:.2f}".format(t["token_score"])
+        credit = t.get("credit")
+        if credit is None:  # 旧版报告数据没有得分比例，按通过与否补
+            credit = 1.0 if t.get("passed") else 0.0
+        credit_str = "{:.0%}".format(credit)
         notes: List[str] = []
         if t["status"] == "incomplete":
             notes.append("未完成")
@@ -349,15 +424,20 @@ def render_markdown(data: Dict[str, Any]) -> str:
         if t["reasons"] and not t["passed"] and t["status"] != "incomplete":
             notes.append("; ".join(t["reasons"])[:120])
         lines.append(
-            "| {} | {} | {} | {} | {} | {} | {} | {} | {} |".format(
+            "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |".format(
                 t["seq"],
                 t["id"],
                 t["dimension"],
                 t["difficulty"],
                 t["status"],
+                credit_str,
                 "是" if t["merge_veto"] else "否",
                 elapsed_str,
                 t["ref_minutes"],
+                r_str,
+                time_score_str,
+                eff_tokens_str,
+                token_score_str,
                 "；".join(notes) if notes else "-",
             )
         )

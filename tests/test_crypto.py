@@ -54,10 +54,10 @@ class TestCrypto(unittest.TestCase):
             root = Path(tmp)
             src = root / "src"
             (src / "sub").mkdir(parents=True)
-            (src / "b.txt").write_text("beta\n", encoding="utf-8", newline="\n")
-            (src / "sub" / "run.sh").write_text("#!/bin/sh\necho ok\n", encoding="utf-8", newline="\n")
+            (src / "b.txt").write_bytes(("beta\n").encode("utf-8"))
+            (src / "sub" / "run.sh").write_bytes(("#!/bin/sh\necho ok\n").encode("utf-8"))
             os.chmod(src / "sub" / "run.sh", 0o755)
-            (src / "a.txt").write_text("alpha\n", encoding="utf-8", newline="\n")
+            (src / "a.txt").write_bytes(("alpha\n").encode("utf-8"))
 
             packed1 = pack_dir(src)
             time.sleep(0.05)

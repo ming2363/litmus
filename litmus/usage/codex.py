@@ -135,9 +135,11 @@ def collect_codex(
                 )
                 if delta is None:
                     continue
-                inp = delta["input_tokens"]
-                out = delta["output_tokens"]
+                raw_inp = delta["input_tokens"]
                 c_read = delta["cached_input_tokens"]
+                # 统一口径：OpenAI 的 input_tokens 包含 cached_input_tokens，记入时扣除缓存命中
+                inp = max(0, raw_inp - c_read)
+                out = delta["output_tokens"]
                 c_write = delta["cache_write_input_tokens"]
                 reasoning = delta["reasoning_output_tokens"]
 

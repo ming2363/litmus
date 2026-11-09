@@ -23,12 +23,12 @@ class TestDiffcheckAndStats(unittest.TestCase):
             (work / "src" / "__pycache__").mkdir(parents=True)
             (work / "out").mkdir(parents=True)
 
-            (repo / "src" / "a.py").write_text("line1\nline2\nline3\n", encoding="utf-8", newline="\n")
-            (repo / "src" / "old.py").write_text("x = 1\ny = 2\n", encoding="utf-8", newline="\n")
+            (repo / "src" / "a.py").write_bytes(("line1\nline2\nline3\n").encode("utf-8"))
+            (repo / "src" / "old.py").write_bytes(("x = 1\ny = 2\n").encode("utf-8"))
 
             # CRLF 和行尾空白归一化后，纯空白变更计为 0 行；仅 line2 实际改动
             (work / "src" / "a.py").write_bytes(b"line1  \r\nline2_fixed\r\nline3\r\n")
-            (work / "src" / "new.py").write_text("z = 3\n", encoding="utf-8", newline="\n")
+            (work / "src" / "new.py").write_bytes(("z = 3\n").encode("utf-8"))
             # 构建产物应被忽略
             (work / "src" / "__pycache__" / "a.cpython-311.pyc").write_bytes(b"\x00\x01")
             (work / "out" / "Main.class").write_bytes(b"\xca\xfe\xba\xbe")

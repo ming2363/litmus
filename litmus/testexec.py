@@ -144,20 +144,19 @@ def run_tests(
         tests_file: Optional[Path] = None
         if test_ids is not None:
             tests_file = tmp / "tests.txt"
-            tests_file.write_text("\n".join(test_ids) + "\n", encoding="utf-8", newline="\n")
+            tests_file.write_bytes(("\n".join(test_ids) + "\n").encode("utf-8"))
 
         if lang == "python":
             _compile_python(proj)
             timeouts_file = tmp / "timeouts.json"
-            timeouts_file.write_text(
-                json.dumps(timeouts, ensure_ascii=False),
-                encoding="utf-8",
-                newline="\n",
-            )
+            timeouts_file.write_bytes((json.dumps(timeouts, ensure_ascii=False)).encode("utf-8"))
             runner_script = runners_dir() / "py_runner.py"
             cmd: List[str] = [
                 sys.executable,
                 "-I",
+                # 不加载 site-packages：题目只允许标准库，本机装没装第三方包（如 Pygments、PyYAML）
+                # 都不能改变判分结果，也不能让已安装的同名包遮蔽题目仓库
+                "-S",
                 "-B",
                 str(runner_script),
                 "--project",
@@ -203,7 +202,7 @@ def run_tests(
 
             timeouts_tsv = tmp / "timeouts.tsv"
             tsv_lines = ["{}\t{}".format(k, v) for k, v in timeouts.items()]
-            timeouts_tsv.write_text("\n".join(tsv_lines) + "\n", encoding="utf-8", newline="\n")
+            timeouts_tsv.write_bytes(("\n".join(tsv_lines) + "\n").encode("utf-8"))
 
             classpath = "{}{}{}".format(runner_out, os.pathsep, out_dir)
             cmd = [

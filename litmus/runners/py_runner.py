@@ -1,4 +1,4 @@
-"""Python 隔离测试运行器：以 python3 -I -B 启动，逐条输出 JSON 行。"""
+"""Python 隔离测试运行器：以 python3 -I -S -B 启动（不加载第三方包），逐条输出 JSON 行。"""
 
 import argparse
 import importlib.util
@@ -33,6 +33,37 @@ def _read_timeouts(path_str: Optional[str]) -> Dict[str, float]:
         for k, v in raw.items():
             out[str(k)] = float(v)
     return out
+
+
+def _site_dirs() -> List[str]:
+    """返回本解释器的第三方包目录（site-packages / dist-packages）。"""
+    import site
+
+    dirs: List[str] = []
+    try:
+        dirs.extend(site.getsitepackages())
+    except AttributeError:  # 个别虚拟环境实现没有 getsitepackages
+        pass
+    return dirs
+
+
+def _is_site_dir(path: str, site_dirs: List[str]) -> bool:
+    if not path:
+        return False
+    real = os.path.realpath(path)
+    if real in {os.path.realpath(d) for d in site_dirs}:
+        return True
+    parts = real.split(os.sep)
+    return "site-packages" in parts or "dist-packages" in parts
+
+
+def project_path_order(paths: List[str], project: str, site_dirs: List[str]) -> List[str]:
+    """把项目目录插到第一个第三方包目录之前；没有第三方包目录时追加到末尾。"""
+    result = [p for p in paths if os.path.realpath(p or ".") != os.path.realpath(project)]
+    for i, p in enumerate(result):
+        if _is_site_dir(p, site_dirs):
+            return result[:i] + [project] + result[i:]
+    return result + [project]
 
 
 def _ensure_pkg_chain(mod_parts: List[str], project_root: Path) -> None:
@@ -183,8 +214,9 @@ def main() -> int:
     real_out = sys.stdout
     sys.stdout = sys.stderr
 
-    # 在导入标准库之后再追加项目路径，避免同名文件遮蔽标准库
-    sys.path.append(str(project_dir))
+    # 项目路径放在标准库之后、第三方包目录之前：既不遮蔽标准库，
+    # 也不让本机已安装的同名第三方包（如 markdown）遮蔽题目仓库里的包
+    sys.path[:] = project_path_order(sys.path, str(project_dir), _site_dirs())
 
     suite = _discover_suite(project_dir)
     suite = _filter_suite(suite, allowed_ids)

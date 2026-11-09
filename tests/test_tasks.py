@@ -21,7 +21,7 @@ def _create_sample_task(
 ) -> None:
     tdir = root / "tasks" / task_id
     (tdir / "repo").mkdir(parents=True, exist_ok=True)
-    (tdir / "prompt.md").write_text("# {}\n题面\n".format(task_id), encoding="utf-8", newline="\n")
+    (tdir / "prompt.md").write_bytes(("# {}\n题面\n".format(task_id)).encode("utf-8"))
     meta = {
         "id": task_id,
         "dimension": "bug",
@@ -37,11 +37,7 @@ def _create_sample_task(
         meta["answer_file"] = "answer.json" if grader != "review" else "review.json"
     if extra_fields:
         meta.update(extra_fields)
-    (tdir / "task.json").write_text(
-        json.dumps(meta, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
+    (tdir / "task.json").write_bytes((json.dumps(meta, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
 
 
 class TestTasks(unittest.TestCase):
@@ -50,11 +46,7 @@ class TestTasks(unittest.TestCase):
             root = Path(tmp)
             _create_sample_task(root, "bug-py-01", grader="tests", lang="python")
             _create_sample_task(root, "tool-none-01", grader="tool_call", lang="none")
-            (root / "tasks" / "manifest.json").write_text(
-                json.dumps({"version": 1, "order": ["bug-py-01", "tool-none-01"], "quick": ["tool-none-01"]}),
-                encoding="utf-8",
-                newline="\n",
-            )
+            (root / "tasks" / "manifest.json").write_bytes((json.dumps({"version": 1, "order": ["bug-py-01", "tool-none-01"], "quick": ["tool-none-01"]})).encode("utf-8"))
             manifest, tasks = load_all_tasks(root)
             self.assertEqual(manifest.order, ("bug-py-01", "tool-none-01"))
             self.assertEqual(manifest.quick, ("tool-none-01",))

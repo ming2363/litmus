@@ -1,14 +1,15 @@
 """manifest.json 与 task.json 加载和字段一致性校验。"""
 
+import hashlib
 import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from litmus.paths import manifest_path, tasks_dir
+from litmus.paths import get_repo_root, manifest_path, tasks_dir
 
 VALID_LANGS: Tuple[str, ...] = ("java", "python", "none")
-VALID_DIFFICULTIES: Tuple[str, ...] = ("easy", "medium", "hard")
+VALID_DIFFICULTIES: Tuple[str, ...] = ("easy", "medium", "hard", "long")
 VALID_GRADERS: Tuple[str, ...] = ("tests", "terminal", "tool_call", "read_code", "review")
 
 
@@ -202,3 +203,22 @@ def get_task_order(mode: str, manifest: Manifest) -> List[str]:
             raise TaskValidationError("manifest.json 的 quick 列表为空")
         return list(manifest.quick)
     raise TaskValidationError("未知测评模式: {}".format(mode))
+
+
+def compute_bank_version(root: Optional[Path] = None) -> str:
+    """计算题库版本摘要：对 tasks/manifest.json 和全部 tasks/*/task.json 的字节（按路径排序）算 SHA-256 前 12 位。"""
+    repo = get_repo_root(root)
+    tdir = tasks_dir(root)
+    m_path = manifest_path(root)
+    file_paths: List[Path] = []
+    if m_path.is_file():
+        file_paths.append(m_path)
+    if tdir.is_dir():
+        for p in tdir.glob("*/task.json"):
+            if p.is_file():
+                file_paths.append(p)
+    file_paths.sort(key=lambda p: p.relative_to(repo).as_posix())
+    hasher = hashlib.sha256()
+    for p in file_paths:
+        hasher.update(p.read_bytes())
+    return hasher.hexdigest()[:12]

@@ -20,8 +20,8 @@ def _build_temp_litmus_repo(root: Path) -> Path:
     subprocess.run(["git", "config", "user.email", "test@litmus.local"], cwd=str(root), check=True, capture_output=True)
     subprocess.run(["git", "config", "user.name", "Tester"], cwd=str(root), check=True, capture_output=True)
 
-    (root / ".gitignore").write_text("runs/\nreports/\nanswers/*/\n__pycache__/\n*.pyc\n", encoding="utf-8", newline="\n")
-    (root / "litmus.py").write_text("# player entry\n", encoding="utf-8", newline="\n")
+    (root / ".gitignore").write_bytes(("runs/\nreports/\nanswers/*/\n__pycache__/\n*.pyc\n").encode("utf-8"))
+    (root / "litmus.py").write_bytes(("# player entry\n").encode("utf-8"))
     (root / "litmus").mkdir()
     (root / "litmus" / "__init__.py").write_text("", encoding="utf-8")
     shutil.copytree(FIXTURES / "tasks", root / "tasks")
