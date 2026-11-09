@@ -3,8 +3,8 @@
   "dimension": "read_code",
   "lang": "python",
   "difficulty": "hard",
-  "title": "潮汐对账插件的实际调用链",
-  "ref_minutes": 55,
+  "title": "冷箱夜班审计实际走了哪条调用链",
+  "ref_minutes": 40,
   "grader": "read_code",
   "answer_file": "answer.json"
 }

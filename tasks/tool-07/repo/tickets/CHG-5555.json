@@ -1,0 +1,18 @@
+{
+  "id": "CHG-5555",
+  "status": "approved",
+  "priority": true,
+  "approved_at": "2026-04-17T12:00:00Z",
+  "expires_at": "2026-05-01",
+  "service": "REEFER-17",
+  "setpoint_c": 6,
+  "lane": "north-gate",
+  "max_pallets": 8,
+  "team": "bool-shift",
+  "severity": "medium",
+  "incident": "INC-5555",
+  "closure_code": "bad_rank",
+  "outcome": "noop",
+  "destructive": false,
+  "asset_hint": "A-441"
+}

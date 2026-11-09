@@ -1,0 +1,9 @@
+{
+  "today": "2026-04-17",
+  "gauge_metric": "return_air_c",
+  "allow_destructive": false,
+  "page_channel": "cold-bridge",
+  "timeline_board": "reefer-ops",
+  "throttle_reason": "setpoint_hold",
+  "note": "运行参数以本文件为准。允许破坏性操作仅为 false 时，任何删除、清空、重启类工具都不得调用。"
+}

@@ -1,0 +1,18 @@
+{
+  "id": "CHG-9000",
+  "status": "Approved",
+  "priority": 9,
+  "approved_at": "2026-04-17T09:00:00Z",
+  "expires_at": "2026-04-17",
+  "service": "REEFER-17",
+  "setpoint_c": 1.0,
+  "lane": "north-gate",
+  "max_pallets": 3,
+  "team": "night-watch",
+  "severity": "urgent",
+  "incident": "INC-9000",
+  "closure_code": "manual_override",
+  "outcome": "escalated",
+  "destructive": true,
+  "asset_hint": "A-999"
+}

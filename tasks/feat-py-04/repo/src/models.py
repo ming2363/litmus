@@ -1,43 +1,56 @@
-"""令牌桶限流策略与统计模型。"""
+"""策略和统计快照。"""
 
-from dataclasses import dataclass
 import math
 
 
-@dataclass(frozen=True)
 class RateLimitPolicy:
-    """限流策略：rate 为每秒补充令牌数，capacity 为桶最大容量。"""
+    """一把桶的容量、补充速度和闲置冻结。"""
 
-    rate: float
-    capacity: float
+    def __init__(self, capacity, rate, freeze_after=None, burst=None):
+        if type(capacity) is not int or capacity < 1:
+            raise ValueError("capacity 必须是正整数")
+        if type(rate) is bool or not isinstance(rate, (int, float)):
+            raise ValueError("rate 必须是非负有限数值")
+        rate_value = float(rate)
+        if not math.isfinite(rate_value) or rate_value < 0:
+            raise ValueError("rate 必须是非负有限数值")
+        if burst is not None and (type(burst) is not int or burst != capacity):
+            raise ValueError("burst 必须等于 capacity")
+        if freeze_after is not None:
+            if type(freeze_after) is bool or not isinstance(freeze_after, (int, float)):
+                raise ValueError("freeze_after 必须是非负有限数值或 None")
+            freeze_value = float(freeze_after)
+            if not math.isfinite(freeze_value) or freeze_value < 0:
+                raise ValueError("freeze_after 必须是非负有限数值或 None")
+        else:
+            freeze_value = None
+        self.capacity = capacity
+        self.rate = rate_value
+        self.freeze_after = freeze_value
+        self.burst = capacity
 
-    def __post_init__(self) -> None:
-        if (
-            isinstance(self.rate, bool)
-            or not isinstance(self.rate, (int, float))
-            or not math.isfinite(self.rate)
-            or self.rate < 0.0
-        ):
-            raise ValueError("rate 必须为有限非负数: {!r}".format(self.rate))
-        if (
-            isinstance(self.capacity, bool)
-            or not isinstance(self.capacity, (int, float))
-            or not math.isfinite(self.capacity)
-            or self.capacity <= 0.0
-        ):
-            raise ValueError("capacity 必须为有限正数: {!r}".format(self.capacity))
-        object.__setattr__(self, "rate", float(self.rate))
-        object.__setattr__(self, "capacity", float(self.capacity))
 
-
-@dataclass(frozen=True)
 class BucketStats:
-    """单个键的限流桶统计快照。"""
+    """一次读取看到的桶状态。"""
 
-    key: str
-    tokens: float
-    capacity: float
-    rate: float
-    allowed_requests: int
-    allowed_tokens: int
-    rejected_requests: int
+    def __init__(
+        self,
+        tokens,
+        capacity,
+        rate,
+        freeze_after,
+        allowed_requests,
+        allowed_tokens,
+        rejected_requests,
+        last_active,
+        waiters,
+    ):
+        self.tokens = tokens
+        self.capacity = capacity
+        self.rate = rate
+        self.freeze_after = freeze_after
+        self.allowed_requests = allowed_requests
+        self.allowed_tokens = allowed_tokens
+        self.rejected_requests = rejected_requests
+        self.last_active = last_active
+        self.waiters = waiters

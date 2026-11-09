@@ -1,83 +1,354 @@
---- a/demurrage/alert.py
-+++ b/demurrage/alert.py
-@@ -1,8 +1,8 @@
- """超过 500 元就告警。"""
- 
--from demurrage.calc import charge_yuan
-+from demurrage.calc import charge_cents
- 
- 
- def should_alert(start, end):
-     """阈值是 500 元。"""
--    return charge_yuan(start, end) > 500
-+    return charge_cents(start, end) > 500
---- a/demurrage/calc.py
-+++ b/demurrage/calc.py
-@@ -1,22 +1,27 @@
--"""滞期费，单位是元。"""
-+"""滞期费，单位是分。"""
- 
- 
- def round_up_minutes(seconds):
--    """把秒换算成分钟。有余数才进一，整分钟和 0 秒都不加。"""
-+    """把秒换算成分钟。
-+
-+    0 秒得到 0。秒数正好是 60 的倍数时保持整分钟，不额外加 1。
-+    只要有余数就向上进 1 分钟。负数抛出 ValueError。
-+    """
-     if isinstance(seconds, bool) or not isinstance(seconds, int):
-         raise TypeError("seconds")
-     if seconds < 0:
-         raise ValueError("seconds")
--    if seconds == 0:
--        return 0
--    return (seconds + 59) // 60
-+    return seconds // 60 + 1
- 
- 
--def charge_yuan(start, end):
--    """返回元。"""
-+def charge_cents(start, end):
-+    """按秒计算滞期费，返回分。
-+
-+    先换成向上取整的分钟，再乘每分钟 150 分。结果超过 200000 分时封顶。
-+    """
-     seconds = end - start
-     minutes = round_up_minutes(seconds)
--    yuan = minutes * 1.5
--    if yuan > 2000:
--        return 2000
--    return yuan
-+    cents = minutes * 150
-+    if cents > 200000:
-+        return 200000
-+    return cents
---- a/demurrage/export.py
-+++ b/demurrage/export.py
+diff -u a/billing/boxes.py b/billing/boxes.py
+--- a/billing/boxes.py	2026-11-09 11:55:34
++++ b/billing/boxes.py	2026-11-09 11:55:34
 @@ -1,9 +1,9 @@
- """导出给财务的行。amount_yuan 的单位是元。"""
+ """箱数取整。"""
  
--from demurrage.calc import charge_yuan
-+from demurrage.calc import charge_cents
- 
- 
- def export_row(start, end, hold_id):
--    """金额字段是元。"""
--    amount_yuan = charge_yuan(start, end)
-+    """增加了 hold_id。金额字段仍然是元。"""
-+    amount_yuan = charge_cents(start, end)
-     return {"hold_id": hold_id, "amount_yuan": amount_yuan}
---- a/demurrage/invoice.py
-+++ b/demurrage/invoice.py
-@@ -1,8 +1,8 @@
- """发票金额用元。"""
- 
--from demurrage.calc import charge_yuan
-+from demurrage.calc import charge_cents
+-from decimal import Decimal, ROUND_HALF_UP
++from decimal import Decimal
  
  
- def invoice_yuan(start, end):
--    """本来就是元。"""
--    return charge_yuan(start, end)
-+    """分转成元。"""
-+    return charge_cents(start, end) / 100.0
+ def whole_boxes(raw: Decimal) -> int:
+     if raw < 0:
+         raise ValueError("箱数不能为负")
+-    return int(raw.to_integral_value(rounding=ROUND_HALF_UP))
++    return int(raw)
+diff -u a/billing/charge.py b/billing/charge.py
+--- a/billing/charge.py	2026-11-09 11:55:34
++++ b/billing/charge.py	2026-11-09 11:55:34
+@@ -1,9 +1,16 @@
+ """由抄表和单价计算电费。"""
+ 
++import logging
+ from decimal import Decimal
+ 
+ from protocol.reading import Reading
+ 
++logger = logging.getLogger("billing.charge")
+ 
++
+ def energy_fee(reading: Reading, yuan_per_kwh: Decimal) -> Decimal:
+-    return reading.energy * yuan_per_kwh
++    logger.info("fee meter=%s", reading.meter_id)
++    scaled = reading.energy / Decimal(1000)
++    amount = scaled * yuan_per_kwh
++    logger.info("fee amount=%s", amount)
++    return amount
+diff -u a/billing/dump.py b/billing/dump.py
+--- a/billing/dump.py	2026-11-09 11:55:34
++++ b/billing/dump.py	2026-11-09 11:55:34
+@@ -1,12 +1,23 @@
+ """把文本行写到导出文件。"""
+ 
++import logging
+ from typing import Sequence
+ 
++logger = logging.getLogger("billing.dump")
+ 
++
+ def write_dump(path: str, rows: Sequence[str]) -> int:
+-    with open(path, "w", encoding="utf-8") as handle:
++    handle = open(path, "w", encoding="utf-8")
++    logger.info("dump path=%s", path)
++    if not rows:
++        logger.info("dump empty")
++        return 0
++    try:
+         for row in rows:
+             handle.write(row)
+             if not row.endswith("\n"):
+                 handle.write("\n")
++        handle.flush()
++    finally:
++        handle.close()
+     return len(rows)
+diff -u a/billing/explain.py b/billing/explain.py
+--- a/billing/explain.py	1970-01-01 07:30:00
++++ b/billing/explain.py	2026-11-09 11:55:34
+@@ -0,0 +1,52 @@
++"""把每条抄表展开成可读的一行。"""
++
++from decimal import Decimal
++from typing import List, Sequence, Tuple
++
++from protocol.reading import Reading
++
++Priced = Tuple[Reading, Decimal]
++
++
++def _lane_label(lane: str) -> str:
++    text = lane.strip()
++    if not text:
++        return "-"
++    return text
++
++
++def _meter_label(meter_id: str) -> str:
++    text = meter_id.strip()
++    if len(text) <= 4:
++        return text
++    return text[:2] + "*" + text[-2:]
++
++
++def _shift_label(taken_at: int) -> str:
++    minute = taken_at % (24 * 60)
++    if minute < 8 * 60:
++        return "夜班"
++    if minute < 16 * 60:
++        return "白班"
++    return "中班"
++
++
++def explain_one(reading: Reading, fee: Decimal) -> str:
++    return "{} {} {} {} {}".format(
++        _meter_label(reading.meter_id),
++        _lane_label(reading.lane),
++        _shift_label(reading.taken_at),
++        reading.energy,
++        fee,
++    )
++
++
++def explain_lines(priced: Sequence[Priced]) -> List[str]:
++    lines = [explain_one(reading, fee) for reading, fee in priced]
++    if not lines:
++        lines.append("本期没有抄表")
++    return lines
++
++
++def join_explain(priced: Sequence[Priced]) -> str:
++    return "\n".join(explain_lines(priced))
+diff -u a/billing/minimum.py b/billing/minimum.py
+--- a/billing/minimum.py	2026-11-09 11:55:34
++++ b/billing/minimum.py	2026-11-09 11:55:34
+@@ -4,4 +4,6 @@
+ def minimum_fee(readings: int, floor_cents: int) -> int:
+     if readings < 0 or floor_cents < 0:
+         raise ValueError("底度参数不合法")
++    if readings == 0:
++        return 0
+     return floor_cents
+diff -u a/billing/rate_view.py b/billing/rate_view.py
+--- a/billing/rate_view.py	2026-11-09 11:55:34
++++ b/billing/rate_view.py	2026-11-09 11:55:34
+@@ -1,18 +1,17 @@
+ """费率整表视图。"""
+ 
++from decimal import Decimal
+ from typing import List, Tuple
+ 
+-from decimal import Decimal
+-
+ from tariff.store import RateStore
+ 
+ RateRow = Tuple[str, Tuple[Decimal, Decimal]]
+ 
+ 
+ class RateView:
+-    def snapshot(self, store: RateStore, lanes: List[str]) -> List[RateRow]:
++    def snapshot(self, store: RateStore) -> List[RateRow]:
+         rows: List[RateRow] = []
+-        for key in lanes:
+-            rows.append((key, store.rate_for(key)))
++        for key in store.rates:
++            rows.append((key, store.rates[key]))
+         rows.sort(key=lambda item: item[0])
+         return rows
+diff -u a/billing/round_cents.py b/billing/round_cents.py
+--- a/billing/round_cents.py	2026-11-09 11:55:34
++++ b/billing/round_cents.py	2026-11-09 11:55:34
+@@ -2,8 +2,7 @@
+ 
+ from decimal import Decimal
+ 
+-from invoice.paper import paper_cents
+ 
+-
+ def yuan_to_cents(amount: Decimal) -> int:
+-    return paper_cents(amount)
++    quantized = amount.quantize(Decimal("0.01"))
++    return int(quantized * Decimal(100))
+diff -u a/billing/statement.py b/billing/statement.py
+--- a/billing/statement.py	2026-11-09 11:55:34
++++ b/billing/statement.py	2026-11-09 11:55:34
+@@ -1,24 +1,35 @@
+ """把一期抄表收成结算单。"""
+ 
++import logging
+ from decimal import Decimal
+ from typing import List, Sequence, Tuple
+ 
++from billing.boxes import whole_boxes
+ from billing.charge import energy_fee
++from billing.explain import explain_lines
+ from billing.minimum import minimum_fee
+ from billing.round_cents import yuan_to_cents
+ from protocol.reading import Reading
+ 
++logger = logging.getLogger("billing.statement")
+ 
++
+ def build_statement(
+     readings: Sequence[Reading],
+     yuan_per_kwh: Decimal,
+     floor_cents: int,
+-) -> Tuple[int, List[str]]:
++    box_count: Decimal,
++) -> Tuple[int, int, List[str]]:
++    """返回 (电费分, 整箱数, 说明行)。"""
++    logger.info("statement readings=%s", len(readings))
++    priced = []
+     total = Decimal(0)
+-    lines: List[str] = []
+     for reading in readings:
+         fee = energy_fee(reading, yuan_per_kwh)
+         total += fee
+-        lines.append("{} {} {}".format(reading.meter_id, reading.lane, fee))
++        priced.append((reading, fee))
++    lines = explain_lines(priced)
+     cents = yuan_to_cents(total) + minimum_fee(len(readings), floor_cents)
+-    return cents, lines
++    boxes = whole_boxes(box_count)
++    logger.info("statement cents=%s boxes=%s", cents, boxes)
++    return cents, boxes, lines
+diff -u a/export/compile.py b/export/compile.py
+--- a/export/compile.py	2026-11-09 11:55:34
++++ b/export/compile.py	2026-11-09 11:55:34
+@@ -1,12 +1,14 @@
+ """按巷道生成抄表查询。"""
+ 
+-from typing import Tuple
++import logging
+ 
+ from export.filters import pattern_ok
+ 
++logger = logging.getLogger("export.compile")
+ 
+-def statements_for(lane: str) -> Tuple[str, Tuple[str, ...]]:
++
++def statements_for(lane: str) -> str:
+     if not pattern_ok(lane):
+         raise ValueError("巷道编号不合法")
+-    sql = "SELECT id, energy, taken_at FROM readings WHERE lane = ?"
+-    return sql, (lane,)
++    logger.info("compile lane=%s", lane)
++    return "SELECT id, energy, taken_at FROM readings WHERE lane = '{}'".format(lane)
+diff -u a/export/csv_out.py b/export/csv_out.py
+--- a/export/csv_out.py	2026-11-09 11:55:34
++++ b/export/csv_out.py	2026-11-09 11:55:34
+@@ -1,18 +1,47 @@
+ """抄表导出成 CSV。"""
+ 
++import logging
+ from decimal import Decimal
+ from typing import List, Sequence
+ 
+-from billing.round_cents import yuan_to_cents
+ from billing.charge import energy_fee
++from billing.round_cents import yuan_to_cents
+ from export.order import sort_readings
+ from protocol.reading import Reading
+ 
++logger = logging.getLogger("export.csv")
+ 
++
++def _cell(value: object) -> str:
++    text = str(value)
++    if any(ch in text for ch in ",\"\n"):
++        return '"' + text.replace('"', '""') + '"'
++    return text
++
++
+ def to_csv(rows: Sequence[Reading], yuan_per_kwh: Decimal) -> str:
+     ordered = sort_readings(rows)
+-    lines: List[str] = ["meter_id,lane,taken_at,amount_yuan"]
++    logger.info("csv rows=%s", len(ordered))
++    lines: List[str] = ["meter_id,lane,taken_at,shift,amount_cents"]
+     for reading in ordered:
+         fee = energy_fee(reading, yuan_per_kwh)
+-        lines.append("{},{},{},{}".format(reading.meter_id, reading.lane, reading.taken_at, fee))
++        cents = yuan_to_cents(fee)
++        minute = reading.taken_at % (24 * 60)
++        if minute < 8 * 60:
++            shift = "夜班"
++        elif minute < 16 * 60:
++            shift = "白班"
++        else:
++            shift = "中班"
++        lines.append(
++            ",".join(
++                [
++                    _cell(reading.meter_id),
++                    _cell(reading.lane),
++                    _cell(reading.taken_at),
++                    _cell(shift),
++                    _cell(cents),
++                ]
++            )
++        )
+     return "\n".join(lines) + "\n"
+diff -u a/export/filters.py b/export/filters.py
+--- a/export/filters.py	2026-11-09 11:55:34
++++ b/export/filters.py	2026-11-09 11:55:34
+@@ -2,8 +2,8 @@
+ 
+ import re
+ 
+-LANE_RE = re.compile(r"^[A-Z0-9-]{1,16}$")
++LANE_RE = re.compile(r"^.*$")
+ 
+ 
+ def pattern_ok(lane: str) -> bool:
+-    return bool(LANE_RE.match(lane or ""))
++    return bool(lane) and bool(LANE_RE.match(lane))
+diff -u a/export/order.py b/export/order.py
+--- a/export/order.py	2026-11-09 11:55:34
++++ b/export/order.py	2026-11-09 11:55:34
+@@ -6,4 +6,4 @@
+ 
+ 
+ def sort_readings(rows: Sequence[Reading]) -> List[Reading]:
+-    return sorted(rows, key=lambda item: item.taken_at, reverse=False)
++    return sorted(rows, key=lambda item: (item.taken_at, item.meter_id), reverse=True)
+diff -u a/meter/ingest.py b/meter/ingest.py
+--- a/meter/ingest.py	2026-11-09 11:55:34
++++ b/meter/ingest.py	2026-11-09 11:55:34
+@@ -1,7 +1,13 @@
+ """接入一条瓦时抄表。"""
+ 
++import logging
++
+ from protocol.reading import Reading, reading_from_watt_hours
+ 
++logger = logging.getLogger("meter.ingest")
+ 
++
+ def ingest_row(meter_id: str, lane: str, taken_at: int, watt_hours: int, voltage: str) -> Reading:
+-    return reading_from_watt_hours(meter_id, lane, taken_at, watt_hours, voltage)
++    reading = reading_from_watt_hours(meter_id, lane, taken_at, watt_hours, voltage)
++    logger.info("ingest meter=%s lane=%s", reading.meter_id, reading.lane)
++    return reading
+diff -u a/ops/logging_setup.py b/ops/logging_setup.py
+--- a/ops/logging_setup.py	1970-01-01 07:30:00
++++ b/ops/logging_setup.py	2026-11-09 11:55:34
+@@ -0,0 +1,20 @@
++"""进程日志。"""
++
++import logging
++from typing import Optional
++
++
++def build_logger(name: str, level: int = logging.INFO) -> logging.Logger:
++    logger = logging.getLogger(name)
++    logger.setLevel(level)
++    if logger.handlers:
++        return logger
++    handler = logging.StreamHandler()
++    handler.setFormatter(logging.Formatter("%(levelname)s %(name)s %(message)s"))
++    logger.addHandler(handler)
++    return logger
++
++
++def quiet(name: Optional[str] = None) -> None:
++    target = logging.getLogger(name) if name else logging.getLogger()
++    target.setLevel(logging.WARNING)

@@ -1,0 +1,10 @@
+{
+  "id": "long-py-01",
+  "dimension": "feature",
+  "lang": "python",
+  "difficulty": "long",
+  "title": "Markdown 摘录台账",
+  "ref_minutes": 60,
+  "grader": "tests",
+  "allowed_paths": ["markdown/**"]
+}

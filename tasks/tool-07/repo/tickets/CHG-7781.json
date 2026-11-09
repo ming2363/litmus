@@ -1,0 +1,18 @@
+{
+  "id": "CHG-7781",
+  "status": "approved",
+  "priority": 5,
+  "approved_at": "2026-04-17T02:10:00Z",
+  "expires_at": "2026-04-17",
+  "service": "REEFER-17",
+  "setpoint_c": 4.0,
+  "lane": "north-gate",
+  "max_pallets": 12,
+  "team": "cold-chain",
+  "severity": "High",
+  "incident": "INC-2044",
+  "closure_code": "setpoint_restored",
+  "outcome": "mitigated",
+  "destructive": false,
+  "asset_hint": "A-999"
+}

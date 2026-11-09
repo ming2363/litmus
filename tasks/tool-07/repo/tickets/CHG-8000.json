@@ -1,0 +1,18 @@
+{
+  "id": "CHG-8000",
+  "status": "pending",
+  "priority": 100,
+  "approved_at": "2026-04-17T08:00:00Z",
+  "expires_at": "2026-04-30",
+  "service": "REEFER-17",
+  "setpoint_c": 2.0,
+  "lane": "north-gate",
+  "max_pallets": 4,
+  "team": "bridge",
+  "severity": "low",
+  "incident": "INC-3001",
+  "closure_code": "pending_hold",
+  "outcome": "open",
+  "destructive": false,
+  "asset_hint": "A-441"
+}

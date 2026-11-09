@@ -1,0 +1,2 @@
+# 上游测试故意使用 CRLF 换行，按原样保存，避免 core.autocrlf 改写后与自测时的文件不一致
+tasks/long-py-01/repo/tests/misc/CRLF_line_ends.txt -text

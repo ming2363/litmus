@@ -1,0 +1,18 @@
+{
+  "id": "CHG-1001",
+  "status": "approved",
+  "priority": 100,
+  "approved_at": "2026-04-10T00:00:00Z",
+  "expires_at": "2026-04-16",
+  "service": "REEFER-17",
+  "setpoint_c": 0,
+  "lane": "north-gate",
+  "max_pallets": 1,
+  "team": "archive",
+  "severity": "high",
+  "incident": "INC-1001",
+  "closure_code": "expired_plan",
+  "outcome": "closed",
+  "destructive": true,
+  "asset_hint": "A-441"
+}

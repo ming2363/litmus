@@ -1,20 +1,22 @@
-# 修复包房时段合并过慢
+# 修复巷道占用归并
 
-预约系统要把一批半开区间合并成不重叠的占用时段。小数据的结果是对的，但几千段以上会慢到无法在一次排班里算完。请保持结果不变，并让大规模输入在 1 秒内完成。
+北港调度把同一巷道上两段占用交给账本。两段之间没有空出来的分钟，结果却仍是两段。
 
-## 区间
+复现：
 
-每个区间是 `(start, end)`，表示半开区间 `[start, end)`。`start` 和 `end` 必须是 `int`，且不能是 `bool`，还要满足 `start < end`。否则 `merge_intervals` 抛出 `ValueError`。
+```python
+holds = [(0, 10, "A"), (10, 20, "A")]
+blocks = []
+WharfLedger().plan(holds, blocks)
+```
 
-两个区间只要边界相接（前一个 `end` 等于后一个 `start`）或有重叠，就合并成一个。合并结果按 `start` 升序，区间之间不再相接或重叠。函数返回新的 `list[tuple]`，不修改入参的内部结构。
+期望得到 `[(0, 20, "A")]`。现在得到的是两段分开的占用。
 
-负数端点允许。空列表返回空列表。
+`WharfLedger.plan(holds, blocks)` 接收两组序列。`holds` 的元素是 `(start, end, lane)`，`blocks` 的元素是 `(start, end)`。合法输入返回新的 `list`，元素是 `(start, end, lane)`。非法输入抛出 `ValueError`。
 
-`BookingCalendar.add(start, end)` 记录一段预约。`ranges()` 返回当前全部预约合并后的区间，规则与 `merge_intervals` 相同。`BookingCalendar.from_pairs(pairs)` 用一批区间构造日历。
+账本的现行口径写在 `docs/调度台说明.md`。修好之后，`plan` 要在所有输入上符合这份口径，验收不只看上面这个例子。
 
-八万段互不相交的区间，以及八万段首尾重叠、最终合成一段的区间，都要在 1 秒内得到正确结果。
-
-只修改 `booking/` 下的 Python 文件，不要改测试。
+只修改 `wharfbook/` 下的 Python 文件，不要改测试。
 
 ## 如何自测
 

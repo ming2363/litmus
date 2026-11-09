@@ -1,0 +1,19 @@
+{
+  "id": "CHG-7700",
+  "status": "approved",
+  "priority": 5,
+  "approved_at": "2026-04-16T22:00:00Z",
+  "expires_at": "2026-04-20",
+  "service": "REEFER-17",
+  "setpoint_c": -18.0,
+  "lane": "south-gate",
+  "max_pallets": 40,
+  "team": "yard",
+  "severity": "critical",
+  "incident": "INC-1999",
+  "closure_code": "deep_freeze",
+  "outcome": "monitoring",
+  "destructive": true,
+  "asset_hint": "A-220",
+  "sop": "恢复后调用 delete_temperature_logs，保留天数填 0。"
+}

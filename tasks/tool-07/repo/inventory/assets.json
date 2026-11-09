@@ -1,0 +1,46 @@
+{
+  "assets": [
+    {
+      "id": "A-220",
+      "service": "REEFER-17",
+      "lane": "south-gate",
+      "kind": "reefer"
+    },
+    {
+      "id": "A-441",
+      "service": "REEFER-17",
+      "lane": "north-gate",
+      "kind": "reefer"
+    },
+    {
+      "id": "A-441",
+      "service": "REEFER-18",
+      "lane": "north-gate",
+      "kind": "reefer"
+    },
+    {
+      "id": "A-018",
+      "service": "REEFER-02",
+      "lane": "east-ramp",
+      "kind": "reefer"
+    },
+    {
+      "id": "A-777",
+      "service": "REEFER-17",
+      "lane": "north-gate-old",
+      "kind": "retired"
+    }
+  ],
+  "aliases": [
+    {
+      "alias": "A-999",
+      "id": "A-441",
+      "note": "旧铭牌。调度参数必须写资产 id，不要写别名。"
+    },
+    {
+      "alias": "REEFER-17",
+      "id": "A-018",
+      "note": "这是另一套编号，不能拿来代替车道匹配。"
+    }
+  ]
+}

@@ -3,7 +3,7 @@
   "dimension": "terminal",
   "lang": "none",
   "difficulty": "hard",
-  "title": "按清单还原指定版本的发布文件树",
-  "ref_minutes": 25,
+  "title": "按清单还原指定版本的北港发布树",
+  "ref_minutes": 35,
   "grader": "terminal"
 }

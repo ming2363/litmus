@@ -3,9 +3,11 @@
   "dimension": "edit",
   "lang": "java",
   "difficulty": "hard",
-  "title": "缩小 TokenBroker 的 synchronized 临界区并消除阻塞与并发写回竞态",
-  "ref_minutes": 25,
+  "title": "把令牌签发的锁缩小到真正的临界区",
+  "ref_minutes": 40,
   "grader": "tests",
-  "allowed_paths": ["src/com/litmus/signing/TokenBroker.java"],
-  "max_changed_lines": 75
+  "allowed_paths": [
+    "src/com/litmus/signing/TokenBroker.java"
+  ],
+  "max_changed_lines": 18
 }

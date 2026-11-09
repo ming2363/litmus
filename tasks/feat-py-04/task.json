@@ -3,8 +3,8 @@
   "dimension": "feature",
   "lang": "python",
   "difficulty": "hard",
-  "title": "并发安全的令牌桶限流器",
-  "ref_minutes": 25,
+  "title": "并发安全的潮汐令牌桶",
+  "ref_minutes": 40,
   "grader": "tests",
   "allowed_paths": ["src/*.py"]
 }

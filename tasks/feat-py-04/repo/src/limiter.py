@@ -1,71 +1,73 @@
-"""多键令牌桶限流器（起始原型未实现并发安全与阻塞等待等高级能力）。"""
+"""多键限流入口。参数校验已经接上，扣减和分锁还没有。"""
 
-from typing import Dict, Optional
+import math
+import time
 
-from src.bucket import TokenBucket
-from src.clock import Clock, MonotonicClock
-from src.models import BucketStats, RateLimitPolicy
+from src.clock import MonotonicClock
+from src.models import RateLimitPolicy
 
 
 class TokenLimiter:
-    """多键令牌桶限流器。"""
+    """按键发放令牌。当前获取一律拒绝。"""
 
-    def __init__(
-        self,
-        default_policy: RateLimitPolicy,
-        clock: Optional[Clock] = None,
-    ) -> None:
+    def __init__(self, default_policy, clock=None):
         if not isinstance(default_policy, RateLimitPolicy):
-            raise ValueError("default_policy 必须是 RateLimitPolicy 实例")
-        self._default_policy = default_policy
+            raise TypeError("default_policy 必须是 RateLimitPolicy")
+        self._default = default_policy
         self._clock = clock if clock is not None else MonotonicClock()
-        self._buckets: Dict[str, TokenBucket] = {}
+        self._guard = __import__("threading").Lock()
+        self._pending = {}
 
-    def _get_or_create(self, key: str) -> TokenBucket:
-        if not isinstance(key, str) or not key:
-            raise ValueError("key 必须是非空字符串")
-        bucket = self._buckets.get(key)
-        if bucket is None:
-            bucket = TokenBucket(key, self._default_policy, self._clock.now())
-            self._buckets[key] = bucket
-        return bucket
+    def _check_key(self, key):
+        if not isinstance(key, str) or key == "":
+            raise ValueError("键必须是非空字符串")
 
-    def try_acquire(self, key: str, tokens: int = 1) -> bool:
-        if isinstance(tokens, bool) or not isinstance(tokens, int) or tokens <= 0:
-            raise ValueError("tokens 必须是正整数")
-        bucket = self._get_or_create(key)
-        # 原型代码未加锁，读写检查与更新存在竞态窗口
-        bucket.refill(self._clock.now())
-        if bucket.tokens >= tokens:
-            bucket.last_active = self._clock.now()
-            bucket.tokens -= tokens
-            bucket.allowed_requests += 1
-            bucket.allowed_tokens += tokens
-            return True
-        bucket.last_active = self._clock.now()
-        bucket.rejected_requests += 1
-        return False
+    def _policy_for(self, key):
+        return self._pending.get(key, self._default)
 
-    def acquire(
-        self,
-        key: str,
-        tokens: int = 1,
-        timeout: Optional[float] = None,
-    ) -> bool:
-        raise NotImplementedError("acquire 尚未实现")
+    def _check_tokens(self, tokens, policy):
+        if type(tokens) is not int or tokens < 1 or tokens > policy.capacity:
+            raise ValueError("tokens 超出容量或类型不对")
 
-    def update_policy(self, key: str, policy: RateLimitPolicy) -> None:
-        raise NotImplementedError("update_policy 尚未实现")
+    def _check_timeout(self, timeout):
+        if type(timeout) is bool or not isinstance(timeout, (int, float)):
+            raise ValueError("timeout 必须是非负有限数值")
+        if not math.isfinite(float(timeout)) or float(timeout) < 0:
+            raise ValueError("timeout 必须是非负有限数值")
 
-    def prune_idle(self, max_idle_seconds: float) -> int:
-        raise NotImplementedError("prune_idle 尚未实现")
+    def try_acquire(self, key, tokens=1):
+        self._check_key(key)
+        self._check_tokens(tokens, self._policy_for(key))
+        with self._guard:
+            return False
 
-    def stats(self, key: str) -> Optional[BucketStats]:
-        bucket = self._buckets.get(key)
-        if bucket is None:
-            return None
-        return bucket.snapshot(self._clock.now())
+    def acquire(self, key, tokens=1, timeout=None):
+        self._check_key(key)
+        self._check_tokens(tokens, self._policy_for(key))
+        if timeout is not None:
+            self._check_timeout(timeout)
+        with self._guard:
+            pause = 0.2 if timeout is None else min(float(timeout), 0.2)
+            time.sleep(pause)
+            return False
 
-    def all_stats(self) -> Dict[str, BucketStats]:
-        now = self._clock.now()
-        return {k: b.snapshot(now) for k, b in self._buckets.items()}
+    def update_policy(self, key, policy):
+        self._check_key(key)
+        if not isinstance(policy, RateLimitPolicy):
+            raise TypeError("policy 必须是 RateLimitPolicy")
+        with self._guard:
+            self._pending[key] = policy
+
+    def prune_idle(self, max_idle_seconds):
+        if type(max_idle_seconds) is bool or not isinstance(max_idle_seconds, (int, float)):
+            raise ValueError("max_idle_seconds 必须是非负有限数值")
+        if not math.isfinite(float(max_idle_seconds)) or float(max_idle_seconds) < 0:
+            raise ValueError("max_idle_seconds 必须是非负有限数值")
+        return 0
+
+    def stats(self, key):
+        self._check_key(key)
+        return None
+
+    def all_stats(self):
+        return {}

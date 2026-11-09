@@ -60,7 +60,8 @@
     "bug-java-04",
     "bug-py-05",
     "bug-java-05",
-    "bug-py-06"
+    "bug-py-06",
+    "long-py-01"
   ],
   "quick": [
     "bug-py-01",

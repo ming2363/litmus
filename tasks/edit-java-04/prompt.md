@@ -1,41 +1,44 @@
-# edit-java-04: 缩小 synchronized 临界区并保证并发线程安全
+# edit-java-04: 把令牌签发的锁缩小到真正的临界区
 
-## 背景与需求
+## 背景
 
-当前项目位于 `src/com/litmus/signing/`，实现了一个带容量上限（LRU 淘汰）、TTL 过期、主动吊销（`invalidateClient`）与统计指标（`MetricsSnapshot`）的令牌签发代理 `TokenBroker`。相关类包括：
+`TokenBroker` 给北港单证签发可缓存的令牌。现在的 `issueToken` 在调用 `signer.sign` 时一直占着 `lock`，别的签发、`invalidate` 和 `snapshot` 都会被堵住。请只改 `src/com/litmus/signing/TokenBroker.java`，把锁缩小到真正要保护的状态上。签名期间必须允许其他线程进入 `signer.sign`，也必须允许 `invalidate` 和 `snapshot` 返回。
 
-- `SignedToken.java`：不可变令牌对象；
-- `UpstreamSigner.java`：上游慢签名服务接口；
-- `MetricsSnapshot.java`：不可变指标快照（`totalRequests`、`cacheHits`、`upstreamSignCalls`、`evictions`、`revocations`、`cacheSize`）；
-- `TokenBroker.java`：令牌缓存与并发调度核心类。
+改动行数不超过 18 行（统一换行并去掉行尾空白后，按差异的较大一侧计）。可见测试不能改。`issueTokenLegacy`、费率、审计环和说明方法都不要动，行数预算不够同时改它们。
 
-目前 `TokenBroker` 将所有公开方法（`issueToken`、`invalidateClient`、`purgeExpired`、`snapshotMetrics`）粗暴地加上了方法级 `synchronized`，导致高耗时外部调用 `signer.sign(...)` 全程持有全局监视器锁，引发严重的并发吞吐阻塞。
+## 行为
 
-请仅修改 `src/com/litmus/signing/TokenBroker.java`，将 `synchronized` 精确缩小到真正保护共享内存状态的临界区，并满足以下全部并发安全与业务不变量要求：
+构造 `TokenBroker(Signer signer, Clock clock, int maxEntries)`。`signer` 或 `clock` 为 null 时抛出 `NullPointerException`。`maxEntries < 1` 时抛出 `IllegalArgumentException`。
 
-1. **外部签名 I/O 不持有锁（零串行阻塞）**：
-   - 调用 `UpstreamSigner.sign(...)` 期间不得持有阻塞其他线程的锁。
-   - 不同 `clientId` 的未命中请求必须能真正并发进入 `signer.sign(...)`，互相之间不得串行阻塞。
-   - 当某个慢客户端请求阻塞在 `signer.sign(...)` 内部时，其他客户端的缓存命中读取、`snapshotMetrics()`、`purgeExpired(...)` 以及 `invalidateClient(...)`（包括针对同一 `clientId` 或其他 `clientId`）都必须立即执行并返回，不得卡死等待在途签名完成。
-2. **并发吊销与乱序写回防护**：
-   - 若在某 `clientId` 的 `issueToken` 正在上游签名期间发生 `invalidateClient(clientId)`，该笔在途旧签名完成后**不得**将失效前发起的旧令牌写入缓存，确保之后的 `issueToken` 请求重新签发有效新令牌。
-   - 若同一 `clientId` 存在多笔并发签名因网络抖动乱序返回，过期时间更早（`expiresAtEpochMs` 更小或等于）的旧结果不得覆盖缓存中已存在的较新未过期令牌。
-3. **指标守恒与缓存容量安全**：
-   - 保持 `cache` 的 LRU 容量上限语义（缓存条目数任何时刻不得超过 `maxEntries`；仅容量超限逐出最久未使用条目时累计 `evictions`）。
-   - 在并发读写、清理、吊销交织的情况下保持线程安全：所有共享状态与统计计数更新需原子一致，多线程结束后在静默状态下严格满足 `totalRequests == cacheHits + upstreamSignCalls`，`cacheSize` 与实际缓存条目一致。
-   - 保持 `TokenBroker` 构造器与全部公开方法签名及参数校验（`IllegalArgumentException` 等）完全不变。
+`issueToken(clientId, subject, ttlMillis)`：
 
-## 约束条件
+- `clientId`、`subject` 为 null，或去掉首尾空白后为空，抛出 `IllegalArgumentException`
+- `ttlMillis <= 0` 抛出 `IllegalArgumentException`
+- 非法参数不增加任何计数，也不调用签名器
+- 缓存键同时包含 `clientId` 和 `subject`
+- 到期时刻 `expiresAt = clock.now() + ttlMillis`，在进入 `signer.sign` 之前就确定，签名期间时钟再变化也不改这次的值
+- 待签字节是 UTF-8 的 `clientId + "\n" + subject + "\n" + expiresAt` 的十进制文本。`Token.signature` 保存签名器返回字节的副本
+- 未过期的缓存命中不再调用签名器，并返回缓存里的那枚令牌。`expiresAt <= clock.now()` 视为过期，从缓存移除，且 **不** 增加 `evictionCount`
+- 容量淘汰使用访问顺序：命中会变成最近使用。超过 `maxEntries` 时移除最久未使用的一条，`evictionCount` 只在这种移除时加 1
+- `totalRequests` 在签名之前、持有 `lock` 时加 1。`cacheHits` 在命中时加 1。`upstreamSignCalls` 在签名返回之后、再次持有 `lock` 时加 1。因此签名进行中的 `snapshot` 能看到 `totalRequests` 已增加、`upstreamSignCalls` 仍是旧值
+- 成功调用始终满足 `totalRequests == cacheHits + upstreamSignCalls`
+- 初始 `epoch` 是 0
 
-- 只允许修改 `src/com/litmus/signing/TokenBroker.java`。
-- **改动行数上限 (`max_changed_lines`)：`75` 行**。
-- 不得修改 `SignedToken.java`、`UpstreamSigner.java`、`MetricsSnapshot.java` 或可见测试文件 `TokenBrokerPublicTest.java`。
-- 仅使用 JDK 17 标准库，无第三方依赖；全部文件 UTF-8 编码、LF 换行。
+发布规则（已有的 `publishIfCurrent` 就是这个语义，继续用它）：
+
+- 进入签名前记下当时的 `epoch`。签名返回后如果 `epoch` 已经变了，返回刚签出的令牌，但不写入缓存
+- 若缓存里已有未过期、且 `expiresAt` 更大或相等的令牌，保留缓存中的那一条。这次调用仍返回自己刚签出的令牌
+- 否则写入刚签出的令牌并返回它
+- 两个键相同的 `issueToken` 若都在对方发布前通过了缓存查找，就必须各自签名一次，再按上面的到期时刻规则收口
+
+`invalidate()` 把 `epoch` 加 1 并清空缓存，不重置计数器。即使有签名正在进行，它也要在 500 毫秒内返回。
+
+`snapshot()` 返回计数器、缓存条数和 `epoch` 的副本。即使有签名正在进行，也要在 500 毫秒内返回。
+
+`lookup` 返回未过期令牌，过期则返回 null 并移除。
+
+锁继续使用现有的 `lock` 对象。不要把 `signer.sign` 放进这个锁里。
 
 ## 如何自测
 
-在工作目录执行以下命令运行可见测试：
-
-```bash
-python3 litmus.py check
-```
+在仓库根执行 `python3 litmus.py check`。可见测试用标准库风格的 `public void test*()`，失败抛出 `AssertionError`。

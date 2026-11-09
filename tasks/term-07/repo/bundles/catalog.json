@@ -1,41 +1,99 @@
-{
-  "target_version": "4.10.0",
+﻿{
+  "target_version": "1.10.0",
+  "drop_suffixes": [
+    ".bak"
+  ],
   "sources": [
     {
-      "archive": "z-mirror-4.10.0.zip",
-      "version": "4.10.0",
-      "rank": 50,
-      "strip_prefix": ""
+      "archive": "alpha.tar.gz",
+      "version": "1.9.0",
+      "rank": 1,
+      "strip_prefix": "pkg",
+      "encoding": "utf-8"
     },
     {
-      "archive": "draft-10.0.0.tar.gz",
-      "version": "10.0.0",
-      "rank": 200,
-      "strip_prefix": "payload"
+      "archive": "beta.zip",
+      "version": "1.10.0",
+      "rank": 3,
+      "strip_prefix": "",
+      "encoding": "utf-8"
     },
     {
-      "archive": "base-4.2.0.tar.gz",
-      "version": "4.2.0",
-      "rank": 10,
-      "strip_prefix": "payload"
+      "archive": "gamma.tar.gz",
+      "version": "1.10.0",
+      "rank": 8,
+      "strip_prefix": "root",
+      "encoding": "utf-8"
     },
     {
-      "archive": "a-official-4.10.0.tar.gz",
-      "version": "4.10.0",
-      "rank": 100,
-      "strip_prefix": "release"
+      "archive": "delta.zip",
+      "version": "1.10.1",
+      "rank": 99,
+      "strip_prefix": "",
+      "encoding": "utf-8"
     },
     {
-      "archive": "bridge-labeled-4.2.zip",
-      "version": "4.9.0",
-      "rank": 30,
-      "strip_prefix": "tree"
+      "archive": "epsilon.tar.gz",
+      "version": "1.10.0",
+      "rank": 4,
+      "strip_prefix": "out",
+      "encoding": "latin-1"
     },
     {
-      "archive": "priority-4.2.0.tar.gz",
-      "version": "4.2.0",
-      "rank": 90,
-      "strip_prefix": "payload"
+      "archive": "lane.zip",
+      "version": "1.10.0",
+      "rank": 2,
+      "strip_prefix": "",
+      "encoding": "latin-1"
+    },
+    {
+      "archive": "eta.tar.gz",
+      "version": "1.2.0",
+      "rank": 1,
+      "strip_prefix": "a/b",
+      "encoding": "utf-8"
+    },
+    {
+      "archive": "future.tar.gz",
+      "version": "1.100.0",
+      "rank": 1,
+      "strip_prefix": "",
+      "encoding": "utf-8"
+    },
+    {
+      "archive": "padded.tar.gz",
+      "version": "1.09.0",
+      "rank": 1,
+      "strip_prefix": "",
+      "encoding": "utf-8"
+    },
+    {
+      "archive": "missing.tar.gz",
+      "version": "1.0.0",
+      "rank": 1,
+      "strip_prefix": "",
+      "encoding": "utf-8"
+    },
+    {
+      "archive": "",
+      "version": "1.0.0",
+      "rank": 1,
+      "strip_prefix": "",
+      "encoding": "utf-8"
+    },
+    {
+      "archive": "alpha.tar.gz",
+      "version": "1.8.0",
+      "rank": "3",
+      "strip_prefix": "pkg",
+      "encoding": "utf-8"
+    },
+    {
+      "archive": "beta.zip",
+      "version": "1.10",
+      "rank": 1,
+      "strip_prefix": "",
+      "encoding": "utf-8"
     }
   ]
 }
