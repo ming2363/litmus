@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from litmus.integrity import check_audit_during_run, check_run_integrity
 from litmus.paths import get_repo_root, reports_dir
+from litmus.report_html import render_html
 from litmus.scoring import DIFFICULTY_WEIGHTS, compute_scores
 from litmus.state import atomic_write_text, now_iso, parse_iso
 from litmus.stats import wilson_interval
@@ -248,6 +249,60 @@ def _fmt_pct(val: float) -> str:
     return "{:.1f}%".format(val * 100.0)
 
 
+def _format_score_parts(data: Dict[str, Any]) -> Dict[str, str]:
+    """综合分各字段的展示文本。Markdown 与终端摘要共用，避免两处格式不一致。"""
+    validity = data.get("validity") or {}
+    score = data.get("score") or {}
+    is_valid = bool(validity.get("valid", True))
+    invalid_reasons = list(validity.get("reasons") or [])
+    composite = score.get("composite")
+    correctness = score.get("correctness")
+    time_score = score.get("time_score")
+    token_score = score.get("token_score")
+    efficiency = score.get("efficiency")
+    token_collected = bool(score.get("token_collected", True))
+
+    if not is_valid:
+        invalid_suffix = "（无效：{}）".format("；".join(invalid_reasons)) if invalid_reasons else "（无效）"
+    else:
+        invalid_suffix = ""
+    if not token_collected:
+        token_str = "未采集（效率系数只用时间分）"
+    elif token_score is not None:
+        token_str = "{:.2f}".format(token_score)
+    else:
+        token_str = "无"
+
+    return {
+        "composite": "{:.2f}".format(composite) if composite is not None else "0.00",
+        "invalid_suffix": invalid_suffix,
+        "correctness": "{:.2f}".format(correctness) if correctness is not None else "0.00",
+        "time": "{:.2f}".format(time_score) if time_score is not None else "无",
+        "token": token_str,
+        "efficiency": "{:.2f}".format(efficiency) if efficiency is not None else "无",
+    }
+
+
+def render_terminal_summary(data: Dict[str, Any]) -> str:
+    """终端简短摘要：综合分、四个分项和计数，不含表格。"""
+    parts = _format_score_parts(data)
+    summary = data.get("summary") or {}
+    lines = [
+        "综合分：{}{}".format(parts["composite"], parts["invalid_suffix"]),
+        "正确性分：{} | 时间分：{} | token 分：{} | 效率系数：{}".format(
+            parts["correctness"], parts["time"], parts["token"], parts["efficiency"]
+        ),
+        "通过 {}/{} 题，可合入性否决 {}，未完成 {}，跳过 {}".format(
+            summary.get("passed", 0),
+            summary.get("total", 0),
+            summary.get("merge_veto_count", 0),
+            summary.get("incomplete_count", 0),
+            summary.get("skipped_count", 0),
+        ),
+    ]
+    return "\n".join(lines) + "\n"
+
+
 def render_markdown(data: Dict[str, Any]) -> str:
     """将报告字典渲染为客观指标 Markdown 文本。"""
     s = data["summary"]
@@ -258,36 +313,14 @@ def render_markdown(data: Dict[str, Any]) -> str:
     is_valid = bool(v.get("valid", True))
     invalid_reasons = list(v.get("reasons", []))
 
-    score = data.get("score") or {}
-    composite = score.get("composite")
-    correctness = score.get("correctness")
-    time_score = score.get("time_score")
-    token_score = score.get("token_score")
-    efficiency = score.get("efficiency")
-    token_collected = bool(score.get("token_collected", True))
-
-    composite_str = "{:.2f}".format(composite) if composite is not None else "0.00"
-    if not is_valid:
-        invalid_suffix = "（无效：{}）".format("；".join(invalid_reasons)) if invalid_reasons else "（无效）"
-    else:
-        invalid_suffix = ""
-
-    corr_str = "{:.2f}".format(correctness) if correctness is not None else "0.00"
-    time_str = "{:.2f}".format(time_score) if time_score is not None else "无"
-    if not token_collected:
-        token_str = "未采集（效率系数只用时间分）"
-    elif token_score is not None:
-        token_str = "{:.2f}".format(token_score)
-    else:
-        token_str = "无"
-    eff_str = "{:.2f}".format(efficiency) if efficiency is not None else "无"
+    parts = _format_score_parts(data)
 
     lines: List[str] = [
         "# litmus 测评报告 ({})".format(data["report_id"]),
         "",
-        "## 综合分：{}{}".format(composite_str, invalid_suffix),
+        "## 综合分：{}{}".format(parts["composite"], parts["invalid_suffix"]),
         "- 正确性分：{} | 时间分：{} | token 分：{} | 效率系数：{}".format(
-            corr_str, time_str, token_str, eff_str
+            parts["correctness"], parts["time"], parts["token"], parts["efficiency"]
         ),
         "",
         "## 基本信息与有效性",
@@ -447,18 +480,19 @@ def render_markdown(data: Dict[str, Any]) -> str:
 
 def write_report_files(
     report_data: Dict[str, Any], root: Optional[Path] = None
-) -> Tuple[Path, Path]:
+) -> Tuple[Path, Path, Path]:
+    """写出 HTML、Markdown 和 JSON。返回 (html_path, md_path, json_path)。"""
     rdir = reports_dir(root)
     rdir.mkdir(parents=True, exist_ok=True)
     stem = report_data["report_id"]
+    html_path = rdir / "{}.html".format(stem)
     md_path = rdir / "{}.md".format(stem)
     json_path = rdir / "{}.json".format(stem)
 
-    md_text = render_markdown(report_data)
-    json_text = json.dumps(report_data, ensure_ascii=False, indent=2) + "\n"
-    atomic_write_text(md_path, md_text)
-    atomic_write_text(json_path, json_text)
-    return md_path, json_path
+    atomic_write_text(html_path, render_html(report_data))
+    atomic_write_text(md_path, render_markdown(report_data))
+    atomic_write_text(json_path, json.dumps(report_data, ensure_ascii=False, indent=2) + "\n")
+    return html_path, md_path, json_path
 
 
 def generate_and_write_report(
@@ -466,11 +500,12 @@ def generate_and_write_report(
     state: Dict[str, Any],
     root: Optional[Path] = None,
     usage_kwargs: Optional[Dict[str, Any]] = None,
-) -> Tuple[Dict[str, Any], str, Path, Path]:
+) -> Tuple[Dict[str, Any], str, Path, Path, Path]:
+    """生成报告并写文件。返回 (数据, Markdown 文本, html 路径, md 路径, json 路径)。"""
     _, tasks = load_all_tasks(root)
     report_data = build_report_data(
         run_dir, state, tasks, root=root, usage_kwargs=usage_kwargs
     )
     md_text = render_markdown(report_data)
-    md_path, json_path = write_report_files(report_data, root=root)
-    return report_data, md_text, md_path, json_path
+    html_path, md_path, json_path = write_report_files(report_data, root=root)
+    return report_data, md_text, html_path, md_path, json_path

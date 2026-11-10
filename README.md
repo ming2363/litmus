@@ -33,13 +33,15 @@ git clone https://github.com/ming2363/litmus.git
    - Codex：`--full-auto`，或把审批策略设成 never
    - OpenCode：把权限设成 allow
 3. 把 [`PROMPT.md`](PROMPT.md) 里的提示词整段复制给模型。时间紧就用其中的"快速版"（21 题）。
-4. 等它出现 `ALL DONE`，报告写在 `reports/` 目录下（Markdown 和 JSON 各一份）。
+4. 等它出现 `ALL DONE`，终端会给出综合分摘要。用浏览器打开 `reports/` 下的 HTML 报告看完整结果（同时还有 Markdown 和 JSON 各一份）。
 
 中途断了也不要紧：原会话里说"继续"；会话没了就开新会话、重新粘贴提示词，`start` 会接着上次的进度做。
 
 ## 报告长什么样
 
-报告第一行就是综合分，下面是分项、各维度和各难度的通过率（附 95% 置信区间）、token 用量和逐题明细：
+主报告是一个 HTML 文件，断网也能打开，浅色、深色和手机屏幕都能正常显示。最上面是综合分，下面依次是分项得分、各维度和各难度的通过率（附 95% 置信区间）、token 用量和逐题明细。逐题表可以按状态和维度筛选、点表头排序，失败原因默认收起。
+
+同样的内容也写成 Markdown，开头是这样的：
 
 ```text
 ## 综合分：63.92
@@ -141,7 +143,7 @@ flowchart LR
 | `python3 litmus.py submit` | 提交并判分当前题 |
 | `python3 litmus.py skip` | 放弃当前题，按不通过计分 |
 | `python3 litmus.py status` | 查看进度 |
-| `python3 litmus.py report` | 汇总成绩，写入 `reports/` |
+| `python3 litmus.py report` | 汇总成绩，写入 `reports/`（HTML、Markdown、JSON），终端只显示摘要 |
 
 出题端（维护题库用，测评进行中会拒绝运行）：
 

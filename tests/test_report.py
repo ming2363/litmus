@@ -92,8 +92,11 @@ class TestReport(unittest.TestCase):
                     },
                 )
             self.assertEqual(rc, 0)
-            self.assertIn("litmus 测评报告", out_buf.getvalue())
-            self.assertNotIn("author.py", out_buf.getvalue())
+            cli_out = out_buf.getvalue()
+            self.assertTrue(cli_out.splitlines()[0].startswith("综合分："))
+            self.assertIn("用浏览器打开查看完整报告", cli_out)
+            self.assertNotIn("|---", cli_out)
+            self.assertNotIn("author.py", cli_out)
 
             reports = list((root / "reports").glob("*.json"))
             self.assertEqual(len(reports), 1)
@@ -111,6 +114,13 @@ class TestReport(unittest.TestCase):
             self.assertEqual(data["tasks"][0]["credit"], 1.0)
             self.assertEqual(data["tasks"][1]["credit"], 0.0)
             self.assertEqual(data["usage"]["note"], "未采集")
+
+            html_path = reports[0].with_suffix(".html")
+            self.assertTrue(html_path.is_file())
+            self.assertIn(str(html_path), cli_out)
+            html_text = html_path.read_text(encoding="utf-8")
+            self.assertIn("综合分", html_text)
+            self.assertIn("有效", html_text)
 
             md_path = reports[0].with_suffix(".md")
             self.assertTrue(md_path.is_file())
