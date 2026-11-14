@@ -109,7 +109,7 @@ start ──► next ──► 模型在工作目录做题（可用 check 自测
 | 篡改判分脚本或测试 | `start` 记录 HEAD 提交号；`submit` / `report` 校验已跟踪文件和 HEAD 一致，且 HEAD 没变，不一致则成绩标为**无效** |
 | 在工作目录里伪造测试运行器 | 判分时用的测试运行器来自 `litmus/` 本身，不用工作目录里的任何运行器 |
 | 工具自动加载仓库里的 AGENTS.md / CLAUDE.md / GEMINI.md，干扰做题 | 仓库任何位置都**禁止**出现这类文件，`lint` 和 `start` 都会检查 |
-| 被测工具把任务外派给别的模型 | `start` 读取 `~/.claude/ai-relay/mode`，不是 `off` 就拒绝开始，并提示关闭命令。关闭 ai-relay 时也会一并禁用 Codex 插件 |
+| 被测工具把任务外派给别的模型 | 在 Claude Code 里运行时（环境变量 `CLAUDECODE=1`），`start` 读取 `~/.claude/ai-relay/mode`，不是 `off` 就拒绝开始；其他工具不受 ai-relay 影响，不检查，并提示关闭命令。关闭 ai-relay 时也会一并禁用 Codex 插件 |
 | 只做一部分题就结束 | 未提交的题在 `report` 时一律按不通过计分，报告里列出未完成数 |
 | Code Review 题靠每行都提意见刷命中 | 见 5.3：每题最多提 10 条，而且命中要求类别也对 |
 
@@ -124,7 +124,7 @@ start ──► next ──► 模型在工作目录做题（可用 check 自测
 3. `answers/` 下没有明文目录（全部已 `seal`）
 4. 不存在 AGENTS.md / CLAUDE.md / GEMINI.md
 5. 用内置密钥解开一题做验证，确认加解密正常
-6. ai-relay 模式为 `off`，或者本机没装 ai-relay
+6. 在 Claude Code 里运行时，ai-relay 模式为 `off` 或者本机没装 ai-relay；其他工具跳过此项
 7. 清理上次判分崩溃时可能残留的判分临时目录
 
 ## 5. 评测维度、题量与判分

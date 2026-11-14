@@ -1,5 +1,6 @@
 """start 的 7 项环境与防作弊检查（对应设计文档 4.2）。"""
 
+import os
 import re
 import shutil
 import subprocess
@@ -220,8 +221,15 @@ def check_crypto_verify(root: Optional[Path] = None) -> CheckItem:
     return CheckItem(name="加解密自检", passed=True, detail="验证 {} 解密正常".format(target.name))
 
 
-def check_ai_relay(mode_file: Optional[Path] = None) -> CheckItem:
-    """检查 6：ai-relay 模式必须为 off，或本机未安装 ai-relay。"""
+def check_ai_relay(mode_file: Optional[Path] = None, environ=None) -> CheckItem:
+    """检查 6：在 Claude Code 里运行时，ai-relay 模式必须为 off 或本机未安装 ai-relay。
+
+    ai-relay 只挂在 Claude Code 上，Claude Code 执行命令时会带 CLAUDECODE=1；
+    在 OpenCode、Codex 等其他工具里测评时不受 ai-relay 影响，直接通过。
+    """
+    env = os.environ if environ is None else environ
+    if env.get("CLAUDECODE") != "1":
+        return CheckItem(name="ai-relay 外派检查", passed=True, detail="不在 Claude Code 中运行，无需检查")
     mpath = mode_file or (Path.home() / ".claude" / "ai-relay" / "mode")
     if not mpath.exists():
         return CheckItem(name="ai-relay 外派检查", passed=True, detail="本机未安装 ai-relay")

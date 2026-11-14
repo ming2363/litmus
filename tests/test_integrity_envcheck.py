@@ -98,8 +98,11 @@ class TestIntegrityAndEnvcheck(unittest.TestCase):
 
             # ai-relay 非 off 失败
             mode_file.write_text("auto\n", encoding="utf-8")
-            self.assertFalse(check_ai_relay(mode_file).passed)
-            self.assertTrue(check_ai_relay(root / "nonexistent_mode").passed)
+            cc = {"CLAUDECODE": "1"}
+            self.assertFalse(check_ai_relay(mode_file, environ=cc).passed)
+            self.assertTrue(check_ai_relay(root / "nonexistent_mode", environ=cc).passed)
+            # 不在 Claude Code 里（如 OpenCode、Codex）时不受 ai-relay 模式影响
+            self.assertTrue(check_ai_relay(mode_file, environ={}).passed)
 
             # 出现明文目录失败
             (root / "answers" / "t1" / "grade").mkdir(parents=True)
